@@ -8,8 +8,9 @@ import {
 import { reportarCentro } from "../acciones";
 import { SubirFoto } from "@/components/SubirFoto";
 import SelectorUbicacion, { type UbicacionElegida } from "@/components/SelectorUbicacion";
+import { SelectorHorario } from "@/components/SelectorHorario";
+import { SelectorInsumos } from "@/components/SelectorInsumos";
 import { DEPARTAMENTOS, municipiosDe } from "@/lib/divipola";
-import { INSUMOS } from "@/lib/tipos";
 
 const ENTRADA =
   "w-full min-h-11 rounded-xl border border-[var(--borde)] bg-[var(--superficie)] px-3 py-2.5 text-base";
@@ -24,6 +25,16 @@ export default function Reportar() {
 
   const [departamento, setDepartamento] = useState("");
   const [municipio, setMunicipio] = useState("");
+  const [horario, setHorario] = useState("");
+  const [insumos, setInsumos] = useState<{ necesita: string[]; noNecesita: string[] }>({
+    necesita: [],
+    noNecesita: [],
+  });
+
+  const alCambiarInsumos = useCallback(
+    (necesita: string[], noNecesita: string[]) => setInsumos({ necesita, noNecesita }),
+    []
+  );
 
   const municipios = useMemo(() => municipiosDe(departamento), [departamento]);
 
@@ -38,11 +49,26 @@ export default function Reportar() {
 
   async function enviar(formData: FormData) {
     setError("");
+
+    // Validaciones que el navegador no cubre, cada una apuntando al bloque
+    // que hay que corregir: un error al principio del formulario, con el campo
+    // culpable fuera de pantalla, no ayuda a nadie.
     if (!ubicacion) {
-      setError("Marca la ubicación del punto en el mapa.");
+      setError("Falta la ubicación. Usa el GPS, busca la dirección o marca el punto en el mapa.");
       document.getElementById("bloque-ubicacion")?.scrollIntoView({ block: "center" });
       return;
     }
+    if (!horario) {
+      setError("Completa los días y el horario de atención.");
+      document.getElementById("bloque-horario")?.scrollIntoView({ block: "center" });
+      return;
+    }
+    if (insumos.necesita.length === 0) {
+      setError("Marca al menos un insumo que estén recibiendo.");
+      document.getElementById("bloque-insumos")?.scrollIntoView({ block: "center" });
+      return;
+    }
+
     setEnviando(true);
     formData.set("lat", String(ubicacion.lat));
     formData.set("lng", String(ubicacion.lng));
@@ -138,23 +164,16 @@ export default function Reportar() {
           />
         </div>
 
-        <Campo etiqueta="Horario de atención">
-          <input name="horario" maxLength={160}
-            placeholder="Ej: Lunes a sábado, 8am a 6pm" className={ENTRADA} />
-        </Campo>
+        <div id="bloque-horario">
+          <span className="mb-2 block text-sm font-medium">
+            Horario de atención <Requerido />
+          </span>
+          <SelectorHorario onCambio={setHorario} />
+        </div>
 
-        <GrupoInsumos
-          nombre="necesita"
-          titulo="¿Qué están recibiendo?"
-          color="var(--primario-fuerte)"
-        />
-
-        <GrupoInsumos
-          nombre="no_necesita"
-          titulo="¿Qué NO deben llevar?"
-          color="var(--peligro)"
-          ayuda="Este es el dato más útil de todos: evita que lleguen donaciones que ya sobran y tapan la bodega."
-        />
+        <div id="bloque-insumos">
+          <SelectorInsumos onCambio={alCambiarInsumos} />
+        </div>
 
         <SubirFoto
           onSubida={setFotoUrl}
@@ -232,33 +251,6 @@ function Campo({
       )}
       {children}
     </div>
-  );
-}
-
-function GrupoInsumos({
-  nombre, titulo, color, ayuda,
-}: { nombre: string; titulo: string; color: string; ayuda?: string }) {
-  return (
-    <fieldset>
-      <legend className="mb-1 text-sm font-medium" style={{ color }}>{titulo}</legend>
-      {ayuda && (
-        <p className="mb-2 text-xs text-[var(--texto-suave)] text-pretty">{ayuda}</p>
-      )}
-      <div className="flex flex-wrap gap-1.5">
-        {INSUMOS.map(({ id, nombre: n, Icono }) => (
-          <label
-            key={id}
-            className="presionable flex min-h-11 cursor-pointer items-center gap-1.5 rounded-xl border border-[var(--borde)] bg-[var(--superficie)] px-3 text-sm has-checked:border-current has-checked:font-semibold"
-            style={{ ["--tw-current" as string]: color }}
-          >
-            <input type="checkbox" name={nombre} value={id}
-              className="h-4 w-4 accent-[var(--primario)]" />
-            <Icono size={15} aria-hidden />
-            {n}
-          </label>
-        ))}
-      </div>
-    </fieldset>
   );
 }
 

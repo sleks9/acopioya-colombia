@@ -92,20 +92,32 @@ export default function MapaCentros({
       const color = COLOR[c.estado] ?? "#55635c";
       const aproximado = c.precision === "aproximada";
 
+      // MapLibre posiciona cada marcador escribiendo `transform: translate(...)`
+      // en ESTE elemento. Tocar su transform (por ejemplo para un scale al
+      // pasar el cursor) borra la traslacion y el marcador salta a la esquina
+      // del mapa. Por eso el elemento raiz solo existe para que MapLibre lo
+      // mueva, y todo lo visual vive en un hijo que si puede animarse.
       const el = document.createElement("button");
       el.type = "button";
       el.setAttribute("aria-label", `${c.nombre}, ${c.direccion}`);
+      el.style.cssText =
+        "background:none;border:0;padding:0;cursor:pointer;line-height:0;";
+
+      const punto = document.createElement("span");
       // Un punto de ubicación dudosa se dibuja hueco y con borde punteado:
       // se ve distinto antes de que nadie lea la insignia.
-      el.style.cssText = `
+      punto.style.cssText = `
+        display:block;
         width:${aproximado ? 20 : 18}px;height:${aproximado ? 20 : 18}px;
-        border-radius:50%;cursor:pointer;padding:0;
+        border-radius:50%;
         background:${aproximado ? "transparent" : color};
         border:${aproximado ? `2.5px dashed ${color}` : "2.5px solid #fff"};
         box-shadow:${aproximado ? "none" : "0 1px 4px rgba(0,0,0,.4)"};
         transition:transform 160ms cubic-bezier(0.23,1,0.32,1);`;
-      el.onmouseenter = () => (el.style.transform = "scale(1.25)");
-      el.onmouseleave = () => (el.style.transform = "scale(1)");
+      el.appendChild(punto);
+
+      el.onmouseenter = () => (punto.style.transform = "scale(1.25)");
+      el.onmouseleave = () => (punto.style.transform = "scale(1)");
 
       const etiquetaEstado =
         c.estado === "abierto" ? "Abierto"
