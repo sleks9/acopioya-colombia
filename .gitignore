@@ -32,6 +32,12 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+# ...salvo la plantilla, que no lleva valores reales y documenta el despliegue.
+!.env.example
+
+# Skills de terceros instaladas localmente (ui-ux-pro-max, emil-design-eng).
+# Tienen su propia licencia y su propio repositorio: no forman parte de esta app.
+/skills
 
 # vercel
 .vercel

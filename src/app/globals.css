@@ -1,26 +1,172 @@
 @import "tailwindcss";
 
+/*
+  Sistema: "Trust & Authority" sobre patrón de directorio.
+  Esto se consulta en una emergencia: la jerarquía y el contraste mandan sobre
+  el estilo. Verde = operativo, ámbar = precaución, rojo = detente.
+*/
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+  --fondo: #f8faf9;
+  --superficie: #ffffff;
+  --superficie-2: #f1f5f3;
+  --borde: #dfe5e2;
+  --borde-fuerte: #c3cec9;
+  --texto: #0d1b16;
+  --texto-suave: #55635c;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --primario: #059669;
+  --primario-fuerte: #047857;
+  --primario-fondo: #ecfdf5;
+  --sobre-primario: #ffffff;
+
+  --acento: #b45309;
+  --acento-fondo: #fef6e7;
+
+  --peligro: #c0271f;
+  --peligro-fondo: #fdeeed;
+
+  --info: #14508c;
+  --info-fondo: #e9f0f8;
+
+  --anillo: #059669;
+
+  --sombra-1: 0 1px 2px rgb(13 27 22 / 0.05);
+  --sombra-2: 0 2px 8px -2px rgb(13 27 22 / 0.10), 0 1px 3px rgb(13 27 22 / 0.06);
+  --sombra-3: 0 12px 32px -8px rgb(13 27 22 / 0.18);
+
+  /* Curvas fuertes: las de CSS por defecto no tienen carácter. */
+  --sal-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --sal-in-out: cubic-bezier(0.77, 0, 0.175, 1);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --fondo: #0c1310;
+    --superficie: #141d19;
+    --superficie-2: #1b2621;
+    --borde: #26332d;
+    --borde-fuerte: #3a4a42;
+    --texto: #eef4f1;
+    --texto-suave: #9aa8a1;
+
+    --primario: #34d399;
+    --primario-fuerte: #6ee7b7;
+    --primario-fondo: #06281c;
+    --sobre-primario: #04241a;
+
+    --acento: #e8b563;
+    --acento-fondo: #2e2210;
+
+    --peligro: #f08a83;
+    --peligro-fondo: #331413;
+
+    --info: #7db3e8;
+    --info-fondo: #0f2438;
+
+    --anillo: #34d399;
+
+    --sombra-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --sombra-2: 0 2px 8px -2px rgb(0 0 0 / 0.5);
+    --sombra-3: 0 12px 32px -8px rgb(0 0 0 / 0.6);
   }
 }
 
+@theme inline {
+  --color-fondo: var(--fondo);
+  --color-superficie: var(--superficie);
+  --color-superficie-2: var(--superficie-2);
+  --color-borde: var(--borde);
+  --color-borde-fuerte: var(--borde-fuerte);
+  --color-texto: var(--texto);
+  --color-texto-suave: var(--texto-suave);
+  --color-primario: var(--primario);
+  --color-primario-fuerte: var(--primario-fuerte);
+  --color-primario-fondo: var(--primario-fondo);
+  --color-acento: var(--acento);
+  --color-acento-fondo: var(--acento-fondo);
+  --color-peligro: var(--peligro);
+  --color-peligro-fondo: var(--peligro-fondo);
+  --color-info: var(--info);
+  --color-info-fondo: var(--info-fondo);
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Números tabulares en datos: evita que las cifras bailen al actualizarse. */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--anillo);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Todo lo presionable responde al instante. */
+.presionable {
+  transition: transform 160ms var(--sal-out), background-color 160ms ease,
+    border-color 160ms ease, box-shadow 160ms ease;
+  touch-action: manipulation;
+}
+.presionable:active {
+  transform: scale(0.97);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .presionable:hover {
+    box-shadow: var(--sombra-2);
+  }
+}
+
+/* Entrada escalonada de listas. Decorativa: nunca bloquea la interacción. */
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.aparece {
+  animation: aparecer 320ms var(--sal-out) both;
+}
+
+.mapa-caja {
+  background: var(--superficie-2);
+}
+
+.maplibregl-map {
+  font: inherit;
+}
+
+/* Movimiento reducido: se conservan opacidad y color, se quita el desplazamiento. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .presionable:active {
+    transform: none;
+  }
 }
