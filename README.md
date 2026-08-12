@@ -195,6 +195,18 @@ Requiere `.env.local` con `NEXT_PUBLIC_SUPABASE_URL`,
 5. **Correo de contacto real** en `/privacidad` y `/terminos`.
 6. `pg_cron` para archivar lo no actualizado en 72 h.
 
+## Licencia
+
+El **código** está bajo [MIT](LICENSE): puedes tomarlo, adaptarlo y desplegarlo
+para responder a otro desastre sin pedir permiso. Esto es deliberado. Al buscar
+el precedente venezolano de junio para reutilizarlo, su repositorio estaba
+borrado y hubo que empezar de cero; si mañana tiembla en otro país, que nadie
+pierda ese tiempo.
+
+Los **datos** que expone `/api/centros.json` van bajo
+[CC BY 4.0](https://creativecommons.org/licenses/by/4.0/deed.es): reutilizables
+por medios, alcaldías y organizaciones citando la fuente.
+
 ## Distribución (el cuello de botella real)
 
 El sismo de Venezuela de junio generó ~12 plataformas parecidas y ninguna
