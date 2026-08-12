@@ -52,26 +52,32 @@ export default function Privacidad() {
       </Seccion>
 
       <Seccion titulo="Cómo retirar un punto">
-        <p>
-          Si eres responsable de un lugar publicado aquí y quieres que se
-          retire, o si un punto tiene información equivocada:
-        </p>
-        <ul className="list-disc pl-5 space-y-1">
-          <li>
-            Si tienes el enlace privado que se generó al publicarlo, entra y
-            marca el punto como <strong>Cerrado</strong>.
-          </li>
-          <li>
-            Si no lo tienes, usa el botón{" "}
-            <strong>&ldquo;Ya cerró o no existe&rdquo;</strong> en la ficha del
-            punto. Con tres reportes se retira automáticamente del mapa.
-          </li>
-          <li>
-            Para cualquier otro caso, escribe al correo de contacto del sitio y
-            se atiende manualmente.
-          </li>
-        </ul>
-      </Seccion>
+  <p>
+    Si eres responsable de un lugar publicado aquí y quieres que se retire, o si
+    un punto tiene información equivocada:
+  </p>
+  <ul className="list-disc pl-5 space-y-1">
+    <li>
+      Si tienes el enlace privado que se generó al publicarlo, entra y marca el
+      punto como <strong>Cerrado</strong>.
+    </li>
+    <li>
+      Si no lo tienes, usa el botón{" "}
+      <strong>&ldquo;Ya cerró o no existe&rdquo;</strong> en la ficha del punto.
+      Con tres reportes se oculta temporalmente para revisión.
+    </li>
+    <li>
+      Para cualquier otro caso o atención manual, escribe a{" "}
+      <a
+        href="mailto:acopioyaco@gmail.com"
+        className="text-blue-600 underline font-semibold hover:text-blue-800"
+      >
+        acopioyaco@gmail.com
+      </a>
+      .
+    </li>
+  </ul>
+</Seccion>
 
       <Seccion titulo="Tus derechos">
         <p>
