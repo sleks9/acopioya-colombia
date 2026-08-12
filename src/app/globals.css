@@ -154,6 +154,72 @@ body {
   font: inherit;
 }
 
+/*
+  MapLibre dibuja sus globos con un blanco fijo y texto oscuro. Sobre el tema
+  oscuro quedaban ilegibles. Se reescriben con los tokens del tema para que
+  tengan el mismo contraste que el resto de la interfaz.
+*/
+/*
+  Doble clase a proposito: la hoja de MapLibre se inyecta DESPUES de esta y,
+  a igual especificidad, gana la suya. Con `.maplibregl-popup` delante estas
+  reglas pesan mas y no dependen del orden de carga. Sin esto el globo queda
+  con fondo blanco y el texto claro del tema: invisible.
+*/
+.maplibregl-popup .maplibregl-popup-content {
+  background: var(--superficie);
+  color: var(--texto);
+  border: 1px solid var(--borde);
+  border-radius: 14px;
+  padding: 12px 14px;
+  box-shadow: var(--sombra-3);
+  font: inherit;
+  max-width: 260px;
+}
+
+.maplibregl-popup.maplibregl-popup-anchor-top .maplibregl-popup-tip,
+.maplibregl-popup.maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+.maplibregl-popup.maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+  border-bottom-color: var(--superficie);
+}
+.maplibregl-popup.maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+.maplibregl-popup.maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+.maplibregl-popup.maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+  border-top-color: var(--superficie);
+}
+.maplibregl-popup.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: var(--superficie);
+}
+.maplibregl-popup.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: var(--superficie);
+}
+
+/* Controles de zoom y atribución, también con el tema (misma razón de peso). */
+.maplibregl-ctrl.maplibregl-ctrl-group {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  box-shadow: var(--sombra-2);
+}
+.maplibregl-ctrl.maplibregl-ctrl-group button + button {
+  border-top-color: var(--borde);
+}
+.maplibregl-ctrl.maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+  filter: var(--filtro-icono-mapa, none);
+}
+.maplibregl-ctrl.maplibregl-ctrl-attrib {
+  background: color-mix(in srgb, var(--superficie) 85%, transparent);
+  color: var(--texto-suave);
+}
+.maplibregl-ctrl.maplibregl-ctrl-attrib a {
+  color: var(--texto-suave);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* Los iconos de MapLibre son PNG negros: se invierten para el tema oscuro. */
+    --filtro-icono-mapa: invert(1);
+  }
+}
+
 /* Movimiento reducido: se conservan opacidad y color, se quita el desplazamiento. */
 @media (prefers-reduced-motion: reduce) {
   html {

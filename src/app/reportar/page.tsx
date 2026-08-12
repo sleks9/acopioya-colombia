@@ -10,6 +10,8 @@ import { SubirFoto } from "@/components/SubirFoto";
 import SelectorUbicacion, { type UbicacionElegida } from "@/components/SelectorUbicacion";
 import { SelectorHorario } from "@/components/SelectorHorario";
 import { SelectorInsumos } from "@/components/SelectorInsumos";
+import { MisPuntos } from "@/components/MisPuntos";
+import { guardarMiPunto } from "@/lib/misPuntos";
 import { DEPARTAMENTOS, municipiosDe } from "@/lib/divipola";
 
 const ENTRADA =
@@ -80,8 +82,17 @@ export default function Reportar() {
 
     const r = await reportarCentro(formData);
     setEnviando(false);
-    if (r.ok) setExito({ id: r.id, token: r.token });
-    else setError(r.error);
+    if (r.ok) {
+      // Red de seguridad por si se pierde el enlace mágico.
+      guardarMiPunto({
+        id: r.id,
+        token: r.token,
+        nombre: String(formData.get("nombre") ?? "Mi punto"),
+      });
+      setExito({ id: r.id, token: r.token });
+    } else {
+      setError(r.error);
+    }
   }
 
   if (exito) return <Exito id={exito.id} token={exito.token} />;
@@ -95,6 +106,8 @@ export default function Reportar() {
           mantener el punto actualizado, sin crear ninguna cuenta.
         </p>
       </header>
+
+      <MisPuntos />
 
       <form action={enviar} className="space-y-6">
         <Campo etiqueta="Nombre del punto" requerido>

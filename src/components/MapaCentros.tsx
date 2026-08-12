@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { TriangleAlert } from "lucide-react";
 import * as maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import type { Centro } from "@/lib/tipos";
+import { nombreInsumo, type Centro } from "@/lib/tipos";
 import { estiloMapa } from "@/lib/estiloMapa";
 
 const COLOR: Record<string, string> = {
@@ -124,13 +124,31 @@ export default function MapaCentros({
         : c.estado === "lleno" ? "Lleno — no llevar más"
         : "Cerrado";
 
-      const popup = new maplibregl.Popup({ offset: 14, closeButton: false }).setHTML(
-        `<div style="font:14px/1.45 system-ui,sans-serif;max-width:230px">
-           <strong>${esc(c.nombre)}</strong><br>
-           <span style="color:#666">${esc(c.direccion)}</span><br>
-           <span style="color:${color};font-weight:600">${etiquetaEstado}</span>
+      const fondoEstado =
+        c.estado === "abierto" ? "var(--primario-fondo)"
+        : c.estado === "lleno" ? "var(--acento-fondo)"
+        : "var(--peligro-fondo)";
+
+      const popup = new maplibregl.Popup({ offset: 16, closeButton: false }).setHTML(
+        `<div style="display:grid;gap:6px;line-height:1.45">
+           <span style="display:inline-flex;align-self:start;align-items:center;gap:4px;
+                        background:${fondoEstado};color:${color};
+                        font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px">
+             ${etiquetaEstado}
+           </span>
+           <strong style="font-size:15px;font-weight:650">${esc(c.nombre)}</strong>
+           <span style="font-size:13px;color:var(--texto-suave)">${esc(c.direccion)}</span>
+           ${c.necesita.length ? `<span style="font-size:12.5px">
+              <span style="color:var(--primario-fuerte);font-weight:650">Necesita:</span>
+              ${esc(c.necesita.map(nombreInsumo).join(", "))}</span>` : ""}
+           ${c.no_necesita.length ? `<span style="font-size:12.5px">
+              <span style="color:var(--peligro);font-weight:650">NO llevar:</span>
+              ${esc(c.no_necesita.map(nombreInsumo).join(", "))}</span>` : ""}
            ${aproximado ? AVISO_APROXIMADO : ""}
-           <br><a href="/centro/${c.id}" style="color:#14508c;font-weight:600">Ver detalle →</a>
+           <a href="/centro/${c.id}"
+              style="color:var(--info);font-weight:650;font-size:13px;text-decoration:none;margin-top:2px">
+             Ver detalle &rarr;
+           </a>
          </div>`
       );
 
