@@ -1,35 +1,15 @@
 "use client";
 
-import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import {
   AlertCircle, ArrowRight, CheckCircle2, Copy, Loader2, MessageCircle, ShieldOff,
 } from "lucide-react";
 import { reportarCentro } from "../acciones";
 import { SubirFoto } from "@/components/SubirFoto";
-import type { UbicacionElegida } from "@/components/SelectorUbicacion";
+import SelectorUbicacion, { type UbicacionElegida } from "@/components/SelectorUbicacion";
+import { DEPARTAMENTOS, municipiosDe } from "@/lib/divipola";
 import { INSUMOS } from "@/lib/tipos";
-
-const SelectorUbicacion = dynamic(() => import("@/components/SelectorUbicacion"), {
-  ssr: false,
-  loading: () => (
-    <div className="mapa-caja grid h-72 w-full place-items-center rounded-xl border border-[var(--borde)]">
-      <span className="flex items-center gap-2 text-sm text-[var(--texto-suave)]">
-        <Loader2 size={16} className="animate-spin" aria-hidden />
-        Cargando mapa…
-      </span>
-    </div>
-  ),
-});
-
-const DEPARTAMENTOS = [
-  "Amazonas","Antioquia","Arauca","Atlántico","Bolívar","Boyacá","Caldas","Caquetá",
-  "Casanare","Cauca","Cesar","Chocó","Córdoba","Cundinamarca","Guainía","Guaviare",
-  "Huila","La Guajira","Magdalena","Meta","Nariño","Norte de Santander","Putumayo",
-  "Quindío","Risaralda","San Andrés y Providencia","Santander","Sucre","Tolima",
-  "Valle del Cauca","Vaupés","Vichada",
-];
 
 const ENTRADA =
   "w-full min-h-11 rounded-xl border border-[var(--borde)] bg-[var(--superficie)] px-3 py-2.5 text-base";
@@ -41,6 +21,18 @@ export default function Reportar() {
   const [error, setError] = useState("");
   const [exito, setExito] = useState<{ id: string; token: string } | null>(null);
   const [contactoPublico, setContactoPublico] = useState(false);
+
+  const [departamento, setDepartamento] = useState("");
+  const [municipio, setMunicipio] = useState("");
+
+  const municipios = useMemo(() => municipiosDe(departamento), [departamento]);
+
+  // La cabecera del municipio le da al mapa un punto de partida util, en vez
+  // de arrancar mirando todo el pais.
+  const centroSugerido = useMemo(() => {
+    const m = municipios.find((x) => x.n === municipio);
+    return m ? { lat: m.lat, lng: m.lng } : null;
+  }, [municipios, municipio]);
 
   const alCambiarUbicacion = useCallback((u: UbicacionElegida) => setUbicacion(u), []);
 
@@ -86,38 +78,64 @@ export default function Reportar() {
           />
         </Campo>
 
-        <div id="bloque-ubicacion">
-          <label className="mb-1.5 block text-sm font-medium">
-            Ubicación exacta <Requerido />
-          </label>
-          <p className="mb-2 text-xs text-[var(--texto-suave)] text-pretty">
-            Busca la dirección o mueve el mapa hasta que el pin quede sobre la
-            entrada. Si estás en el lugar ahora, <strong>Estoy aquí</strong> es
-            lo más preciso.
-          </p>
-          <SelectorUbicacion onCambio={alCambiarUbicacion} />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Campo etiqueta="Departamento" requerido>
+            <select
+              name="departamento"
+              required
+              value={departamento}
+              onChange={(e) => {
+                setDepartamento(e.target.value);
+                setMunicipio("");
+              }}
+              className={ENTRADA}
+            >
+              <option value="">Elige un departamento</option>
+              {DEPARTAMENTOS.map((d) => (
+                <option key={d} value={d}>{d}</option>
+              ))}
+            </select>
+          </Campo>
+
+          <Campo etiqueta="Municipio" requerido>
+            <select
+              name="ciudad"
+              required
+              value={municipio}
+              onChange={(e) => setMunicipio(e.target.value)}
+              disabled={!departamento}
+              className={`${ENTRADA} disabled:opacity-50`}
+            >
+              <option value="">
+                {departamento ? "Elige un municipio" : "Elige primero el departamento"}
+              </option>
+              {municipios.map((m) => (
+                <option key={m.n} value={m.n}>{m.n}</option>
+              ))}
+            </select>
+          </Campo>
         </div>
 
         <Campo etiqueta="Dirección escrita" requerido
-          ayuda="Es lo que la gente lee para confirmar por teléfono. Escríbela completa aunque ya hayas marcado el mapa.">
+          ayuda="Es lo que la gente lee para confirmar por teléfono. Escríbela completa aunque ya hayas marcado la ubicación.">
           <input
             name="direccion" required minLength={3} maxLength={240}
             placeholder="Ej: Calle 63 # 60-80" className={ENTRADA}
           />
         </Campo>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Campo etiqueta="Ciudad" requerido>
-            <input name="ciudad" required minLength={2} maxLength={80}
-              placeholder="Ej: Bogotá" className={ENTRADA} />
-          </Campo>
-          <Campo etiqueta="Departamento" requerido>
-            <input name="departamento" required list="departamentos"
-              minLength={2} maxLength={80} placeholder="Ej: Cundinamarca" className={ENTRADA} />
-            <datalist id="departamentos">
-              {DEPARTAMENTOS.map((d) => <option key={d} value={d} />)}
-            </datalist>
-          </Campo>
+        <div id="bloque-ubicacion">
+          <label className="mb-1.5 block text-sm font-medium">
+            Ubicación exacta <Requerido />
+          </label>
+          <p className="mb-2 text-xs text-[var(--texto-suave)] text-pretty">
+            Con cualquiera de las tres opciones basta. Si estás en el lugar
+            ahora, el GPS es lo más preciso y no necesita cargar el mapa.
+          </p>
+          <SelectorUbicacion
+            centroSugerido={centroSugerido}
+            onCambio={alCambiarUbicacion}
+          />
         </div>
 
         <Campo etiqueta="Horario de atención">

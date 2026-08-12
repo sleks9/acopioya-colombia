@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Camera, CheckCircle2, Loader2 } from "lucide-react";
+import { useRef, useState } from "react";
+import { Camera, CheckCircle2, Loader2, Trash2, X } from "lucide-react";
 import { supabase } from "@/lib/supabase";
 import { comprimirImagen } from "@/lib/comprimirImagen";
 
@@ -25,6 +25,23 @@ export function SubirFoto({
   const [previa, setPrevia] = useState<string | null>(null);
   const [ahorro, setAhorro] = useState<string | null>(null);
   const [error, setError] = useState("");
+  const entrada = useRef<HTMLInputElement>(null);
+
+  /**
+   * Descarta la foto elegida. No borra el archivo ya subido al Storage: el rol
+   * anonimo no tiene permiso de borrado, a proposito, para que nadie pueda
+   * eliminar las fotos de otros. Queda un archivo huerfano de ~40 KB que no
+   * esta enlazado desde ningun punto; se limpian aparte.
+   */
+  function quitar() {
+    if (previa) URL.revokeObjectURL(previa);
+    setPrevia(null);
+    setAhorro(null);
+    setError("");
+    setEstado("vacio");
+    if (entrada.current) entrada.current.value = "";
+    onSubida(null);
+  }
 
   async function manejar(archivo: File | undefined) {
     if (!archivo) return;
@@ -73,17 +90,31 @@ export function SubirFoto({
       <label className="block text-sm font-medium">{etiqueta}</label>
       {ayuda && <p className="text-xs text-[var(--texto-suave)] text-pretty">{ayuda}</p>}
 
-      <label className="presionable flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-xl border border-[var(--borde-fuerte)] bg-[var(--superficie)] px-3.5 text-sm font-semibold">
-        <Camera size={16} aria-hidden />
-        {estado === "listo" ? "Cambiar foto" : "Tomar o elegir foto"}
-        <input
-          type="file"
-          accept="image/*"
-          capture="environment"
-          onChange={(e) => manejar(e.target.files?.[0])}
-          className="sr-only"
-        />
-      </label>
+      <div className="flex flex-wrap gap-2">
+        <label className="presionable flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-xl border border-[var(--borde-fuerte)] bg-[var(--superficie)] px-3.5 text-sm font-semibold">
+          <Camera size={16} aria-hidden />
+          {estado === "listo" ? "Cambiar foto" : "Tomar o elegir foto"}
+          <input
+            ref={entrada}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            onChange={(e) => manejar(e.target.files?.[0])}
+            className="sr-only"
+          />
+        </label>
+
+        {(estado === "listo" || estado === "error") && (
+          <button
+            type="button"
+            onClick={quitar}
+            className="presionable flex min-h-11 items-center gap-1.5 rounded-xl border border-[var(--peligro)] px-3.5 text-sm font-semibold text-[var(--peligro)]"
+          >
+            <Trash2 size={16} aria-hidden />
+            Quitar foto
+          </button>
+        )}
+      </div>
 
       {estado === "trabajando" && (
         <p className="flex items-center gap-2 text-sm text-[var(--texto-suave)]">
@@ -94,8 +125,19 @@ export function SubirFoto({
 
       {estado === "listo" && previa && (
         <div className="flex items-center gap-2.5">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={previa} alt="Vista previa" className="h-16 w-16 rounded-xl object-cover" />
+          <div className="relative">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={previa} alt="Vista previa" className="h-16 w-16 rounded-xl object-cover" />
+            {/* La X sobre la miniatura: es donde la mano va a buscarla. */}
+            <button
+              type="button"
+              onClick={quitar}
+              aria-label="Quitar la foto"
+              className="presionable absolute -right-2 -top-2 grid h-7 w-7 place-items-center rounded-full border-2 border-[var(--superficie)] bg-[var(--peligro)] text-white shadow-[var(--sombra-2)]"
+            >
+              <X size={14} strokeWidth={3} aria-hidden />
+            </button>
+          </div>
           <span className="text-sm">
             <span className="flex items-center gap-1.5 font-medium text-[var(--primario-fuerte)]">
               <CheckCircle2 size={15} aria-hidden />

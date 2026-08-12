@@ -82,15 +82,41 @@ Cuando el encargado actualiza su punto desde el celular, la ubicación pasa a
 
 Tres caminos hacia la misma coordenada, porque en emergencia cualquiera falla:
 
-1. **Buscar la dirección** — autocompletado con Photon; si no responde en 4 s,
+1. **"Estoy en el lugar ahora"** — GPS del dispositivo, guardando la exactitud
+   en metros. Es lo más preciso y **no descarga el mapa**.
+2. **Buscar la dirección** — autocompletado con Photon; si no responde en 4 s,
    cae a Nominatim en la búsqueda explícita (Enter o botón). Nominatim nunca se
-   usa para autocompletar: su política de uso lo desaconseja.
-2. **Mover el mapa** — el pin queda fijo al centro y se mueve el mapa debajo
-   (patrón de Uber/inDrive). Más preciso que tocar con el dedo, que tapa justo
-   lo que apuntas.
-3. **"Estoy aquí"** — GPS del dispositivo, guardando la exactitud en metros.
+   usa para autocompletar: su política de uso lo desaconseja. Tampoco necesita
+   el mapa.
+3. **Ajustar el pin en el mapa** — el pin queda fijo al centro y se mueve el
+   mapa debajo (patrón de Uber/inDrive). Más preciso que tocar con el dedo, que
+   tapa justo lo que apuntas.
 
-El resultado del buscador nunca se guarda como definitivo: solo acerca el mapa.
+**El mapa solo se descarga si se pide.** MapLibre pesa 1 MB; con la carga
+diferida, `/reportar` arranca en ~874 KB en vez de ~1,9 MB. La mayoría resuelve
+con el GPS en dos toques y nunca lo baja. Si el chunk falla, se muestra un aviso
+que empuja a las otras dos opciones, en vez de quedarse en «Cargando…» para
+siempre.
+
+## Departamentos y municipios
+
+División político-administrativa oficial del DANE (DIVIPOLA): **33
+departamentos y 1.122 municipios** georreferenciados, en `src/lib/divipola.json`
+(51 KB, importado solo por `/reportar`).
+
+- El formulario usa selectores en cascada: al elegir departamento se filtran sus
+  municipios, y la cabecera municipal centra el mapa si se abre.
+- La validación se repite **en la base de datos**, no solo en el formulario: la
+  RPC `crear_centro` está expuesta por PostgREST y cualquiera puede llamarla con
+  la llave pública. `municipio_valido()` rechaza municipios inventados y pares
+  departamento/municipio incorrectos.
+- La comparación ignora tildes y mayúsculas, y **guarda la grafía oficial**: si
+  llega `"san jose del palmar" / "choco"`, se almacena
+  `"San José del Palmar" / "Chocó"`. Así el filtro por ciudad no se parte entre
+  variantes del mismo lugar.
+- Se usan los nombres de uso corriente donde el registro oficial se aparta de
+  ellos: `Santiago de Cali` → **Cali**, `Cartagena de Indias` → **Cartagena**,
+  `Bogotá, D.C.` → **Bogotá**.
 
 ## Auto-moderación
 
