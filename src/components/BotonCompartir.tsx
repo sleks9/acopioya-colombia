@@ -217,8 +217,14 @@ function Hoja({ tipo, id, textos, url, alCerrar }: Props & { alCerrar: () => voi
         </div>
         <p className="mt-1.5 text-xs text-[var(--texto-suave)]">{lienzo.detalle}</p>
 
-        {/* ── Previsualización ── */}
-        <div className="mt-3 flex min-h-40 items-center justify-center rounded-xl bg-[var(--superficie-2)] p-3">
+        {/*
+          Altura fija, no elástica. Dos razones: el contenedor es un hijo flex
+          de una hoja con `max-h`, así que sin `shrink-0` se encogía y la
+          imagen —que no encoge— se desbordaba por arriba y por abajo, tapando
+          el texto de ayuda. Y con altura fija la hoja deja de dar saltos al
+          cambiar entre formatos de proporciones muy distintas.
+        */}
+        <div className="relative mt-3 flex h-[42dvh] shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[var(--superficie-2)] p-3">
           {verPrevio ? (
             <>
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -226,7 +232,7 @@ function Hoja({ tipo, id, textos, url, alCerrar }: Props & { alCerrar: () => voi
                 key={formato}
                 src={enlaceTarjeta(formato, ANCHO_PREVIO)}
                 alt={`Previsualización de la tarjeta en formato ${lienzo.etiqueta.toLowerCase()}`}
-                className="lienzo-previo max-h-[46dvh] w-auto rounded-lg shadow-[var(--sombra-2)]"
+                className="lienzo-previo max-h-full max-w-full rounded-lg object-contain shadow-[var(--sombra-2)]"
                 data-cambiando={cargando}
                 onLoad={() => setCargando(false)}
                 onError={() => setCargando(false)}

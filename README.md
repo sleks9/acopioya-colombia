@@ -7,7 +7,12 @@ Lo que existe hoy son listas estáticas de prensa: direcciones publicadas el dí
 que siguen mandando gente el día 6 a puntos que ya cerraron o que están
 desbordados. Esto es lo mismo, pero vivo.
 
-Creado por **Santiago Rios Morales (Sleks)**.
+Creado por **Santiago Ríos Morales (Sleks)** — Cali, Colombia.
+[@sleks_92](https://www.instagram.com/sleks_92/) · sleks.dev@gmail.com
+
+> El código es MIT y los datos CC BY 4.0: reutilízalos para responder a otro
+> desastre sin pedir permiso. Lo único que piden ambas licencias es la
+> atribución.
 
 ## Qué lo hace distinto
 

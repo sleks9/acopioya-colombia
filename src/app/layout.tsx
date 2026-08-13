@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
-import { HandHeart, Heart, MapPin, PawPrint, Plus, Users } from "lucide-react";
+import { HandHeart, MapPin, PawPrint, Plus, Users } from "lucide-react";
+import { Autoria } from "@/components/Autoria";
 import "./globals.css";
 
 // Autoalojada por next/font: sin peticion a un dominio externo y sin FOIT.
@@ -175,13 +176,13 @@ export default function RootLayout({
                 y no publica cuentas bancarias. Para donaciones en efectivo usa
                 únicamente los canales oficiales de la Cruz Roja Colombiana y la UNGRD.
               </p>
-              <p className="flex items-center gap-1.5 pt-1">
-                Hecho con
-                <Heart size={12} className="text-[var(--peligro)]" aria-label="cariño" />
-                por{" "}
-                <strong className="text-[var(--texto)]">Santiago Rios Morales (Sleks)</strong>
-                {" "}· Datos bajo licencia CC BY 4.0
-              </p>
+              <div className="pt-1">
+                <Autoria />
+                <p className="mt-2">
+                  Código bajo licencia MIT · Datos bajo licencia CC BY 4.0.
+                  Puedes reutilizar ambos citando la fuente.
+                </p>
+              </div>
             </div>
           </div>
         </footer>

@@ -5,8 +5,12 @@ import {
 } from "lucide-react";
 import { obtenerCentros } from "@/lib/datos";
 import { abiertoAhora } from "@/lib/tipos";
+import { DifundirSitio } from "@/components/DifundirSitio";
+import { origen } from "@/lib/tarjeta/marca";
 
 export const revalidate = 60;
+
+const SITIO = origen();
 
 export default async function Inicio() {
   const centros = await obtenerCentros();
@@ -217,6 +221,35 @@ export default async function Inicio() {
             Publicar un punto
             <ArrowRight size={18} aria-hidden />
           </Link>
+        </div>
+      </section>
+
+      {/*
+        Difundir no es promoción: un mapa que nadie conoce no evita ni un solo
+        viaje en balde. El precedente venezolano de junio dejó doce plataformas
+        parecidas y ninguna llegó a ser la que se consultaba.
+      */}
+      <section className="mx-auto max-w-6xl px-4 pb-16">
+        <div className="rounded-2xl border-2 border-[var(--primario)] bg-[var(--primario-fondo)] p-8 text-center">
+          <h2 className="text-2xl font-bold tracking-tight text-balance">
+            Compartir esto ayuda más que donar dos veces
+          </h2>
+          <p className="mx-auto mt-2 max-w-2xl text-[var(--texto-suave)] text-pretty">
+            La información desactualizada hace daño: manda gente con el carro
+            lleno a bodegas que ya cerraron y entierra a los puntos que sí
+            necesitan ayuda hoy. Si conoces a alguien que va a donar, que es
+            voluntario o que está organizando un punto, mándale este enlace.
+            Toma dos segundos y evita un viaje perdido.
+          </p>
+          <div className="mt-6">
+            <DifundirSitio url={SITIO} />
+          </div>
+          <p className="mx-auto mt-5 max-w-xl text-xs text-[var(--texto-suave)] text-pretty">
+            AcopioYa es gratuito, no tiene publicidad y{" "}
+            <strong className="text-[var(--texto)]">nunca pide dinero</strong>.
+            Lo único que necesita para servir de algo es que la gente correcta
+            lo tenga a mano.
+          </p>
         </div>
       </section>
     </>
