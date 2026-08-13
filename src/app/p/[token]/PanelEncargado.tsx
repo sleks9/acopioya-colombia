@@ -9,7 +9,9 @@ import { actualizarCentro, type CentroPropio } from "@/app/acciones";
 import { SubirFoto } from "@/components/SubirFoto";
 import { SelectorHorario } from "@/components/SelectorHorario";
 import { guardarMiPunto } from "@/lib/misPuntos";
-import { haceCuanto, INSUMOS } from "@/lib/tipos";
+import { haceCuanto, INSUMOS, type Estado } from "@/lib/tipos";
+import { BotonCompartir } from "@/components/BotonCompartir";
+import { textosCentro, urlPublica } from "@/lib/tarjeta/texto";
 
 const ESTADOS = [
   {
@@ -232,6 +234,25 @@ export function PanelEncargado({
         {guardando && <Loader2 size={18} className="animate-spin" aria-hidden />}
         {guardando ? "Guardando…" : "Guardar cambios"}
       </button>
+
+      {/* La tarjeta se arma con lo ya publicado, no con lo que hay en este
+          formulario sin guardar: si acabas de cambiar algo, guarda primero. */}
+      <section className="rounded-2xl border border-[var(--borde)] bg-[var(--superficie)] p-4">
+        <h2 className="mb-1 font-semibold">Difunde tu punto</h2>
+        <p className="mb-3 text-sm text-[var(--texto-suave)]">
+          Una imagen con los datos de hoy, lista para tus estados y grupos de
+          WhatsApp. Lleva un código QR para que quien la reciba pueda comprobar
+          si sigue vigente.
+        </p>
+        <div className="flex">
+          <BotonCompartir
+            tipo="centro"
+            id={centro.id}
+            textos={textosCentro({ ...centro, estado: centro.estado as Estado })}
+            url={urlPublica("centro", centro.id)}
+          />
+        </div>
+      </section>
 
       {/* En otra pestaña a proposito: la ficha publica no lleva el enlace
           magico, asi que navegar hacia alla dejaba al encargado sin forma de

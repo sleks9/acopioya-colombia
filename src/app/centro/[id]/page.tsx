@@ -10,6 +10,8 @@ import {
   AvisoPrecision, InsigniaEstado, InsigniaFrescura, InsigniaPrecision, InsigniaVerificacion,
 } from "@/components/Insignias";
 import { BotonesVoto } from "@/components/BotonesVoto";
+import { BotonCompartir } from "@/components/BotonCompartir";
+import { textosCentro, urlPublica } from "@/lib/tarjeta/texto";
 
 export const revalidate = 60;
 
@@ -29,16 +31,26 @@ export async function generateMetadata(
 
   // Estas etiquetas son lo que se ve al pegar el enlace en WhatsApp, que es
   // el canal real por donde circula esta informacion.
+  //
+  // La imagen es la tarjeta generada, no la foto que subio el encargado: la
+  // foto sola no dice si el punto esta abierto ni que estan recibiendo, y los
+  // puntos sin foto —la mayoria— no tenian vista previa en absoluto.
+  const imagen = {
+    url: `/api/tarjeta/centro/${c.id}?formato=enlace`,
+    width: 1200,
+    height: 630,
+    alt: `${c.nombre}, ${estado}. ${c.ciudad}.`,
+  };
+
   return {
     title: `${c.nombre} — ${c.ciudad}`,
     description: `${estado}. ${c.direccion}, ${c.ciudad}.${necesita}`,
     openGraph: {
       title: `${c.nombre} · ${estado}`,
       description: `${c.direccion}, ${c.ciudad}.${necesita}`,
-      // Tambien via proxy: cada vez que alguien pega el enlace en WhatsApp,
-      // su servidor descarga esta imagen para la vista previa.
-      images: c.foto_url ? [urlFoto(c.foto_url)!] : undefined,
+      images: [imagen],
     },
+    twitter: { card: "summary_large_image", images: [imagen] },
   };
 }
 
@@ -163,6 +175,17 @@ export default async function DetalleCentro(
         >
           Abrir en Waze
         </a>
+      </div>
+
+      {/* Cualquiera que vea el punto puede difundirlo, no solo quien lo
+          publicó: la distribución es el cuello de botella de este proyecto. */}
+      <div className="flex">
+        <BotonCompartir
+          tipo="centro"
+          id={centro.id}
+          textos={textosCentro(centro)}
+          url={urlPublica("centro", centro.id)}
+        />
       </div>
 
       <div className="rounded-2xl border border-[var(--borde)] bg-[var(--superficie)] p-4">

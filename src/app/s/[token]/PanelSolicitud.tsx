@@ -10,6 +10,8 @@ import { guardarMiPunto } from "@/lib/misPuntos";
 import {
   ESTADOS, NECESIDADES, URGENCIAS, type EstadoSolicitud, type Urgencia,
 } from "@/lib/solicitudes";
+import { BotonCompartir } from "@/components/BotonCompartir";
+import { textosSolicitud, urlPublica } from "@/lib/tarjeta/texto";
 
 type SolicitudPropia = {
   id: string;
@@ -237,6 +239,22 @@ export function PanelSolicitud({
           {error}
         </p>
       )}
+
+      <section className="rounded-2xl border border-[var(--borde)] bg-[var(--superficie)] p-4">
+        <h2 className="mb-1 font-semibold">Difunde tu solicitud</h2>
+        <p className="mb-3 text-sm text-[var(--texto-suave)]">
+          Una imagen con lo que necesitan, lista para estados y grupos de
+          WhatsApp. Solo lleva el barrio o vereda, nunca la dirección exacta.
+        </p>
+        <div className="flex">
+          <BotonCompartir
+            tipo="solicitud"
+            id={solicitud.id}
+            textos={textosSolicitud(solicitud)}
+            url={urlPublica("solicitud", solicitud.id)}
+          />
+        </div>
+      </section>
 
       <a
         href={`/solicitud/${solicitud.id}`}

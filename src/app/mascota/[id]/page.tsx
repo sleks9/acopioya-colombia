@@ -10,6 +10,8 @@ import {
   haceDias, iconoEspecie, nombreEspecie, tituloMascota,
 } from "@/lib/mascotas";
 import { AvisoMascota } from "@/components/AvisoMascota";
+import { BotonCompartir } from "@/components/BotonCompartir";
+import { textosMascota, urlPublica } from "@/lib/tarjeta/texto";
 
 export const revalidate = 60;
 
@@ -24,10 +26,20 @@ export async function generateMetadata(
     ? `Se perdió ${tituloMascota(m)} en ${m.municipio}`
     : `${nombreEspecie(m.especie)} encontrado en ${m.municipio}`;
 
+  // La tarjeta generada en vez de la foto suelta: lleva la foto igual, pero
+  // ademas dice si esta perdida o encontrada, donde y desde cuando.
+  const imagen = {
+    url: `/api/tarjeta/mascota/${m.id}?formato=enlace`,
+    width: 1200,
+    height: 630,
+    alt: titulo,
+  };
+
   return {
     title: titulo,
     description: `${m.color}. ${m.senas ?? ""} ${haceDias(m.dias_desde)} en ${m.municipio}, ${m.departamento}.`.trim(),
-    openGraph: { title: titulo, images: [urlFoto(m.foto_url) ?? m.foto_url] },
+    openGraph: { title: titulo, images: [imagen] },
+    twitter: { card: "summary_large_image", images: [imagen] },
   };
 }
 
@@ -167,6 +179,16 @@ export default async function DetalleMascota(
           </>
         )}
       </section>
+
+      {/* Difundir es, literalmente, la forma de encontrarla. */}
+      <div className="flex">
+        <BotonCompartir
+          tipo="mascota"
+          id={m.id}
+          textos={textosMascota(m)}
+          url={urlPublica("mascota", m.id)}
+        />
+      </div>
 
       {m.estado === "activa" && (
         <div className="rounded-2xl border border-[var(--borde)] bg-[var(--superficie)] p-4">

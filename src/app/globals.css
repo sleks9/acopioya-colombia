@@ -146,6 +146,64 @@ body {
   animation: aparecer 320ms var(--sal-out) both;
 }
 
+/*
+  Hoja de compartir.
+
+  Entra en 220 ms y sale en 150 ms: al abrir el usuario está decidiendo y el
+  movimiento le explica de dónde viene la hoja; al cerrar ya decidió y esperar
+  la animación solo estorba.
+
+  En móvil sube desde abajo con la curva de cajón de iOS. En escritorio es un
+  modal centrado, y por eso conserva `transform-origin: center`: no está
+  anclado a ningún botón concreto, a diferencia de un menú.
+*/
+.hoja-fondo {
+  transition: opacity 220ms var(--sal-out);
+}
+.hoja {
+  transition:
+    transform 220ms cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 220ms var(--sal-out);
+  transform: translateY(100%);
+  opacity: 0;
+}
+.hoja[data-visible="true"] {
+  transform: translateY(0);
+  opacity: 1;
+}
+.hoja[data-cerrando="true"] {
+  transition-duration: 150ms;
+}
+
+@media (min-width: 640px) {
+  .hoja {
+    /* Nada aparece de la nada: entra desde 0,96, no desde cero. */
+    transform: scale(0.96);
+  }
+  .hoja[data-visible="true"] {
+    transform: scale(1);
+  }
+}
+
+/*
+  El cambio de formato cruza dos imágenes distintas. Sin el desenfoque se ven
+  como dos objetos superpuestos durante el relevo; con él, el ojo lee una sola
+  transformación.
+*/
+.lienzo-previo {
+  transition: filter 200ms ease, opacity 200ms ease;
+}
+.lienzo-previo[data-cambiando="true"] {
+  filter: blur(2px);
+  opacity: 0.6;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hoja {
+    transform: none;
+  }
+}
+
 .mapa-caja {
   background: var(--superficie-2);
 }

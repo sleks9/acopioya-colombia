@@ -32,6 +32,7 @@ Creado por **Santiago Rios Morales (Sleks)**.
 | `/como-funciona` | Las reglas del sistema, explicadas |
 | `/terminos`, `/privacidad` | Legal |
 | `/api/centros.json` | Datos abiertos con CORS, CC BY 4.0 |
+| `/api/tarjeta/[tipo]/[id]` | La ficha como imagen compartible, en tres formatos |
 
 ## Arquitectura
 
@@ -144,6 +145,64 @@ estado de cada dato son el elemento visual principal, no la decoración.
 - Animaciones ≤ 320 ms con curvas fuertes (`cubic-bezier(0.23,1,0.32,1)`),
   `scale(0.97)` al presionar, y `prefers-reduced-motion` respetado.
 
+## Tarjetas compartibles
+
+En Colombia la difusión de emergencia no ocurre por enlaces: ocurre por
+**imágenes reenviadas** en grupos y estados de WhatsApp. Un enlace se pierde en
+la conversación; una imagen se reenvía sola. Cualquier ficha se exporta como
+imagen desde `/api/tarjeta/{tipo}/{id}?formato=…`, en tres lienzos:
+
+| Formato | Tamaño | Para qué |
+|---|---|---|
+| `historia` | 1080×1920 | Estado de WhatsApp, historias de Instagram y Facebook |
+| `feed` | 1080×1350 | Feed de Instagram y reenvío en grupos |
+| `enlace` | 1200×630 | Se genera sola al pegar el enlace en un chat |
+
+El mismo endpoint alimenta `openGraph.images`, así que **los puntos sin foto
+pasaron a tener vista previa**: antes se usaba la foto cruda del usuario y, sin
+ella, no había imagen ninguna.
+
+### Una imagen reenviada es un dato muerto
+
+Es el problema que trae la idea: el PNG va a seguir circulando cuando el punto
+ya cerró — justo la patología que esta plataforma existe para corregir. Por eso
+cada tarjeta lleva la **fecha y hora en que se generó** y un **QR de vuelta a la
+ficha viva**, con la frase «Los datos cambian. Escanea antes de salir.» Quien
+recibe el reenvío tiene cómo comprobar si sigue vigente.
+
+Se verificó que el QR sobrevive a la recompresión de WhatsApp: sigue siendo
+legible tras reescalar a 800 px y bajar la calidad JPEG a 35.
+
+El formato `enlace` es el único sin QR, a propósito: esa imagen solo aparece
+pegada *junto* al enlace, donde tocarlo es más fácil que escanear nada.
+
+### Por qué se genera en el servidor
+
+Con `ImageResponse` de `next/og`, no con una librería de captura en el
+navegador. Serían ~200 KB de JavaScript extra en un dispositivo con mala red,
+para hacer peor lo que el servidor hace bien — y la vista previa del enlace
+seguiría rota, porque necesita una URL.
+
+Dos trampas que costaron sangre y quedan documentadas:
+
+- **Satori no decodifica WebP.** No falla: devuelve la tarjeta sin la foto, con
+  código 200. Como las fotos se suben en WebP siempre que el navegador pueda,
+  casi todas caían en ese hueco. Se transcodifican a JPEG con `sharp` antes de
+  componer (`src/lib/tarjeta/foto.ts`).
+- **Satori no propaga el layout a través de fragmentos** (`<>…</>`) y encoge los
+  hijos flex hasta solaparlos si no caben. De ahí el `flexShrink: 0` en todas
+  las piezas y los `div` con `flexDirection` explícito.
+
+### Peso
+
+`ImageResponse` solo emite PNG, y una historia con foto pesa **885 KB**. La
+misma tarjeta en JPEG de calidad 86 pesa **102 KB**: ocho veces y media menos,
+que es la diferencia entre una imagen que carga con mala red y otra que no. Por
+eso la salida es JPEG cuando hay foto y PNG cuando no —sin foto la tarjeta es
+texto sobre planos de color, y ahí PNG comprime mejor y no ensucia los bordes
+de las letras—. La previsualización de la hoja se pide con `?ancho=520`, y con
+ahorro de datos o 2G no se descarga hasta que se pide.
+
 ## Costos y transferencia (egress)
 
 La preocupación razonable es que un pico de tráfico agote el plan gratuito de
@@ -245,3 +304,6 @@ dominó. Construir el mapa es un fin de semana; que sea *el* mapa es el trabajo.
 3. **Llevarle a cada punto sembrado su enlace mágico.** Es la conversión que
    importa: convierte datos copiados de prensa en datos vivos — y de paso
    arregla las coordenadas aproximadas.
+4. **Que cada encargado difunda su propio punto.** Para eso están las tarjetas
+   compartibles: el alcance no depende de que la plataforma tenga audiencia,
+   sino de que cada punto tenga la suya y pueda usarla en dos toques.

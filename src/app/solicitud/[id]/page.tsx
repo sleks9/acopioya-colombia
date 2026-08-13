@@ -11,6 +11,8 @@ import {
   ESTADOS, iconoNecesidad, nombreNecesidad, TIPOS, URGENCIAS,
 } from "@/lib/solicitudes";
 import { BotonesVotoSolicitud } from "@/components/BotonesVotoSolicitud";
+import { BotonCompartir } from "@/components/BotonCompartir";
+import { textosSolicitud, urlPublica } from "@/lib/tarjeta/texto";
 
 export const revalidate = 60;
 
@@ -20,14 +22,22 @@ export async function generateMetadata(
   const { id } = await params;
   const s = await obtenerSolicitud(id);
   if (!s) return { title: "Solicitud no encontrada" };
+  const imagen = {
+    url: `/api/tarjeta/solicitud/${s.id}?formato=enlace`,
+    width: 1200,
+    height: 630,
+    alt: `${s.titulo}. ${s.barrio_vereda}, ${s.municipio}.`,
+  };
+
   return {
     title: s.titulo,
     description: `${s.barrio_vereda}, ${s.municipio}. Necesitan: ${s.necesita.map(nombreNecesidad).join(", ")}.`,
     openGraph: {
       title: s.titulo,
       description: `${s.barrio_vereda}, ${s.municipio}`,
-      images: s.foto_url ? [urlFoto(s.foto_url)!] : undefined,
+      images: [imagen],
     },
+    twitter: { card: "summary_large_image", images: [imagen] },
   };
 }
 
@@ -166,6 +176,15 @@ export default async function DetalleSolicitud(
         <MapPin size={16} aria-hidden />
         Ver la zona en el mapa
       </a>
+
+      <div className="flex">
+        <BotonCompartir
+          tipo="solicitud"
+          id={s.id}
+          textos={textosSolicitud(s)}
+          url={urlPublica("solicitud", s.id)}
+        />
+      </div>
 
       <div className="rounded-2xl border border-[var(--borde)] bg-[var(--superficie)] p-4">
         <BotonesVotoSolicitud id={s.id} />

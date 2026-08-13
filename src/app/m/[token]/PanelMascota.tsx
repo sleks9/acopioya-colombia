@@ -8,7 +8,15 @@ import { actualizarMascota } from "@/app/acciones";
 import { SubirFoto } from "@/components/SubirFoto";
 import { guardarMiPunto } from "@/lib/misPuntos";
 import { urlFoto } from "@/lib/tipos";
-import { nombreEspecie } from "@/lib/mascotas";
+import { nombreEspecie, type EstadoMascota } from "@/lib/mascotas";
+import { BotonCompartir } from "@/components/BotonCompartir";
+import { textosMascota, urlPublica } from "@/lib/tarjeta/texto";
+
+/** Días corridos desde el suceso, que la vista pública ya trae calculados. */
+function diasDesde(fecha: string): number {
+  const ms = Date.now() - new Date(`${fecha}T00:00:00-05:00`).getTime();
+  return Math.max(0, Math.floor(ms / 86_400_000));
+}
 
 type MascotaPropia = {
   id: string;
@@ -163,6 +171,28 @@ export function PanelMascota({
           {error}
         </p>
       )}
+
+      <section className="rounded-2xl border border-[var(--borde)] bg-[var(--superficie)] p-4">
+        <h2 className="mb-1 font-semibold">Difunde el reporte</h2>
+        <p className="mb-3 text-sm text-[var(--texto-suave)]">
+          Compartir es, literalmente, la forma de encontrarlo. Esta imagen lleva
+          la foto y las señas, lista para estados y grupos de WhatsApp.
+        </p>
+        <div className="flex">
+          <BotonCompartir
+            tipo="mascota"
+            id={mascota.id}
+            textos={textosMascota({
+              ...mascota,
+              estado: mascota.estado as EstadoMascota,
+              // El panel trae la fecha del suceso, no los días corridos que sí
+              // calcula la vista pública.
+              dias_desde: diasDesde(mascota.fecha_suceso),
+            })}
+            url={urlPublica("mascota", mascota.id)}
+          />
+        </div>
+      </section>
 
       <a
         href={`/mascota/${mascota.id}`}
