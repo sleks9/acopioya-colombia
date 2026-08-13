@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
-import { Heart, MapPin, PawPrint, Plus, Users } from "lucide-react";
+import { HandHeart, Heart, MapPin, PawPrint, Plus, Users } from "lucide-react";
 import "./globals.css";
 
 // Autoalojada por next/font: sin peticion a un dominio externo y sin FOIT.
@@ -69,9 +69,9 @@ export default function RootLayout({
             <nav className="ml-2 hidden gap-1 md:flex" aria-label="Principal">
               {[
                 { href: "/mapa", texto: "Centros de acopio" },
+                { href: "/solicitudes", texto: "Dónde hace falta" },
                 { href: "/mascotas", texto: "Mascotas" },
-                { href: "/buscar-personas", texto: "Buscar personas" },
-                { href: "/como-funciona", texto: "Cómo funciona" },
+                { href: "/buscar-personas", texto: "Personas" },
               ].map((e) => (
                 <Link
                   key={e.href}
@@ -109,9 +109,9 @@ export default function RootLayout({
           <ul className="mx-auto flex max-w-lg">
             {[
               { href: "/mapa", texto: "Acopios", Icono: MapPin },
+              { href: "/solicitudes", texto: "Ayuda", Icono: HandHeart },
               { href: "/mascotas", texto: "Mascotas", Icono: PawPrint },
               { href: "/buscar-personas", texto: "Personas", Icono: Users },
-              { href: "/reportar", texto: "Reportar", Icono: Plus },
             ].map(({ href, texto, Icono }) => (
               <li key={href} className="flex-1">
                 <Link
@@ -144,6 +144,7 @@ export default function RootLayout({
                 <p className="text-sm font-semibold">Navegación</p>
                 <ul className="mt-1.5 space-y-1 text-sm text-[var(--texto-suave)]">
                   <li><Link href="/mapa" className="hover:underline">Centros de acopio</Link></li>
+                  <li><Link href="/solicitudes" className="hover:underline">Dónde hace falta ayuda</Link></li>
                   <li><Link href="/mascotas" className="hover:underline">Mascotas perdidas</Link></li>
                   <li><Link href="/buscar-personas" className="hover:underline">Buscar a una persona</Link></li>
                   <li><Link href="/reportar" className="hover:underline">Reportar un punto</Link></li>

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
-  ArrowRight, BadgeCheck, Clock, HandHeart, MapPin, PackageX,
-  RadioTower, ShieldAlert, Smartphone,
+  ArrowRight, BadgeCheck, Clock, HandHeart, MapPin, PackageX, PawPrint,
+  RadioTower, ShieldAlert, Smartphone, Users,
 } from "lucide-react";
 import { obtenerCentros } from "@/lib/datos";
 import { abiertoAhora } from "@/lib/tipos";
@@ -42,21 +42,37 @@ export default async function Inicio() {
             <strong className="text-[var(--texto)]">qué ya no debes llevar</strong>.
           </p>
 
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link
+          {/*
+            Cuatro caminos, porque quien llega puede venir de cuatro
+            situaciones muy distintas. Se nombran por lo que la persona QUIERE,
+            no por como se llama la seccion.
+          */}
+          <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Camino
               href="/mapa"
-              className="presionable inline-flex items-center gap-2 rounded-xl bg-[var(--primario)] px-5 py-3.5 font-semibold text-[var(--sobre-primario)] shadow-[var(--sombra-2)]"
-            >
-              <MapPin size={18} aria-hidden />
-              Ver puntos cerca de mí
-              <ArrowRight size={18} aria-hidden />
-            </Link>
-            <Link
-              href="/reportar"
-              className="presionable inline-flex items-center gap-2 rounded-xl border border-[var(--borde-fuerte)] bg-[var(--superficie)] px-5 py-3.5 font-semibold"
-            >
-              Publicar un punto
-            </Link>
+              Icono={MapPin}
+              titulo="Quiero donar"
+              detalle="Dónde entregar y qué NO llevar"
+              destacado
+            />
+            <Camino
+              href="/solicitudes"
+              Icono={HandHeart}
+              titulo="Necesito ayuda"
+              detalle="Publica qué necesita tu familia o vereda"
+            />
+            <Camino
+              href="/mascotas"
+              Icono={PawPrint}
+              titulo="Perdí mi mascota"
+              detalle="O me encontré una"
+            />
+            <Camino
+              href="/buscar-personas"
+              Icono={Users}
+              titulo="Busco a alguien"
+              detalle="Canales oficiales de búsqueda"
+            />
           </div>
 
           {centros.length > 0 && (
@@ -204,6 +220,39 @@ export default async function Inicio() {
         </div>
       </section>
     </>
+  );
+}
+
+function Camino({
+  href, Icono, titulo, detalle, destacado = false,
+}: {
+  href: string;
+  Icono: React.ComponentType<{ size?: number; className?: string }>;
+  titulo: string;
+  detalle: string;
+  destacado?: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className="presionable group flex flex-col rounded-2xl border-2 p-4 shadow-[var(--sombra-1)]"
+      style={{
+        borderColor: destacado ? "var(--primario)" : "var(--borde)",
+        background: destacado ? "var(--primario-fondo)" : "var(--superficie)",
+      }}
+    >
+      <Icono
+        size={22}
+        className={destacado ? "text-[var(--primario-fuerte)]" : "text-[var(--texto-suave)]"}
+      />
+      <span className="mt-2.5 font-semibold">{titulo}</span>
+      <span className="mt-0.5 text-sm text-[var(--texto-suave)] text-pretty">{detalle}</span>
+      <ArrowRight
+        size={16}
+        className="mt-2 text-[var(--texto-suave)] transition-transform duration-200 group-hover:translate-x-1"
+        aria-hidden
+      />
+    </Link>
   );
 }
 

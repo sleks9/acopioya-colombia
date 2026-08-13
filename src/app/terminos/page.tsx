@@ -41,14 +41,32 @@ export default function Terminos() {
         <ul className="ml-5 list-disc space-y-1">
           <li>Consultar dónde hay centros de acopio y qué están recibiendo.</li>
           <li>Publicar un punto de acopio y mantenerlo actualizado.</li>
-          <li>Confirmar o desmentir que un punto sigue operando.</li>
+          <li>
+            Publicar y consultar <strong>solicitudes de ayuda</strong> de
+            familias, comunidades e instituciones afectadas.
+          </li>
+          <li>
+            Publicar y consultar reportes de <strong>mascotas</strong> perdidas
+            y encontradas.
+          </li>
+          <li>Confirmar o desmentir que un punto o una solicitud sigue vigente.</li>
         </ul>
         <p className="mt-2">Este sitio <strong>no</strong>:</p>
         <ul className="ml-5 list-disc space-y-1">
           <li>Recibe, transporta ni administra donaciones de ningún tipo.</li>
           <li>Recauda dinero, ni publica cuentas bancarias o enlaces de pago.</li>
           <li>Coordina operaciones de rescate ni atención de emergencias.</li>
-          <li>Gestiona reportes de personas desaparecidas.</li>
+          <li>
+            Gestiona reportes de personas desaparecidas. Para eso enlazamos a los{" "}
+            <Link href="/buscar-personas" className="font-medium text-[var(--info)] underline">
+              canales oficiales
+            </Link>
+            , que sí tienen autoridad y bases de datos.
+          </li>
+          <li>
+            Verifica en terreno las solicitudes de ayuda ni intermedia la
+            entrega de lo que se dona.
+          </li>
         </ul>
         <p className="mt-2">
           Para emergencias marca <strong>123</strong>. Para información oficial
@@ -100,7 +118,49 @@ export default function Terminos() {
         </p>
       </Seccion>
 
-      <Seccion n="5" titulo="Uso indebido">
+      <Seccion n="5" titulo="Si publicas una solicitud de ayuda">
+        <p>
+          Las solicitudes indican <strong>barrio o vereda</strong>, nunca una
+          dirección exacta, y el teléfono solo se publica si marcas la casilla
+          de autorización. Es deliberado: quien acaba de perderlo todo no
+          debería quedar señalado en un mapa.
+        </p>
+        <p>Al publicar una solicitud declaras que:</p>
+        <ul className="ml-5 list-disc space-y-1">
+          <li>La necesidad es real y de tu conocimiento directo.</li>
+          <li>
+            Si publicas a nombre de una comunidad o institución, cuentas con su
+            aval.
+          </li>
+          <li>
+            Las fotos muestran daños o necesidades, <strong>no personas
+            identificables</strong>, y en ningún caso menores de edad.
+          </li>
+        </ul>
+        <p className="mt-2">
+          <strong>Marca la solicitud como cubierta</strong> cuando reciban lo que
+          necesitaban. Una solicitud satisfecha que sigue abierta desvía ayuda de
+          quien todavía la espera.
+        </p>
+      </Seccion>
+
+      <Seccion n="6" titulo="Si publicas una mascota">
+        <p>
+          La foto es obligatoria porque sin ella el reporte no permite reconocer
+          al animal. Publica solo animales que perdiste o encontraste tú.
+        </p>
+        <p>
+          Cuando aparezca, ciérralo desde tu enlace privado. Cualquier persona
+          puede avisar que ya apareció, y con tres avisos el caso se cierra
+          solo. Los reportes sin actividad se archivan a las tres semanas.
+        </p>
+        <p>
+          <strong>Nadie debe cobrarte por devolverte tu mascota.</strong> Si
+          alguien lo hace, es extorsión: repórtalo a la línea 123.
+        </p>
+      </Seccion>
+
+      <Seccion n="7" titulo="Uso indebido">
         <p>Está prohibido usar este sitio para:</p>
         <ul className="ml-5 list-disc space-y-1">
           <li>Publicar puntos falsos, inexistentes o duplicados.</li>
@@ -122,7 +182,7 @@ export default function Terminos() {
         </p>
       </Seccion>
 
-      <Seccion n="6" titulo="Límite de responsabilidad">
+      <Seccion n="8" titulo="Límite de responsabilidad">
         <p>
           El sitio se ofrece <em>tal cual</em> y <em>según disponibilidad</em>.
           En la máxima medida permitida por la ley colombiana, quien opera
@@ -141,7 +201,7 @@ export default function Terminos() {
         </p>
       </Seccion>
 
-      <Seccion n="7" titulo="Contenido que publicas">
+      <Seccion n="9" titulo="Contenido que publicas">
         <p>
           Conservas los derechos sobre lo que publicas. Al publicarlo concedes
           una licencia gratuita y no exclusiva para mostrarlo en el sitio y
@@ -156,7 +216,7 @@ export default function Terminos() {
         </p>
       </Seccion>
 
-      <Seccion n="8" titulo="Datos personales">
+      <Seccion n="10" titulo="Datos personales">
         <p>
           El tratamiento de datos personales se rige por la{" "}
           <Link href="/privacidad" className="font-medium text-[var(--info)] underline">
@@ -166,7 +226,7 @@ export default function Terminos() {
         </p>
       </Seccion>
 
-      <Seccion n="9" titulo="Cambios y vigencia">
+      <Seccion n="11" titulo="Cambios y vigencia">
         <p>
           Estos términos pueden actualizarse mientras dure la emergencia; la
           fecha de la última actualización aparece al inicio. El sitio es una
@@ -175,7 +235,7 @@ export default function Terminos() {
         </p>
       </Seccion>
 
-      <Seccion n="10" titulo="Ley aplicable">
+      <Seccion n="12" titulo="Ley aplicable">
         <p>
           Estos términos se rigen por las leyes de la República de Colombia.
           Cualquier controversia se someterá a los jueces competentes del

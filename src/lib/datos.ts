@@ -124,8 +124,6 @@ export async function obtenerSolicitudes(incluirCubiertas = false) {
   let q = supabase
     .from("solicitudes_publicas")
     .select(COLUMNAS_SOLICITUD)
-    // Lo crítico primero: aquí el orden no es cronológico, es de urgencia.
-    .order("urgencia", { ascending: true })
     .order("actualizado", { ascending: false });
 
   if (!incluirCubiertas) q = q.neq("estado", "cubierta");
@@ -135,7 +133,16 @@ export async function obtenerSolicitudes(incluirCubiertas = false) {
     console.error("obtenerSolicitudes:", error.message);
     return [];
   }
-  return (data ?? []) as unknown as import("./solicitudes").Solicitud[];
+
+  // Lo crítico primero. Ordenar por la columna directamente no sirve: seria
+  // alfabetico y "alta" quedaria antes que "critica", justo al reves de lo que
+  // importa. Se ordena por gravedad y, a igual gravedad, por lo mas reciente.
+  const RANGO: Record<string, number> = { critica: 0, alta: 1, normal: 2 };
+  return ((data ?? []) as unknown as import("./solicitudes").Solicitud[]).sort(
+    (a, b) =>
+      (RANGO[a.urgencia] ?? 9) - (RANGO[b.urgencia] ?? 9) ||
+      +new Date(b.actualizado) - +new Date(a.actualizado)
+  );
 }
 
 export async function obtenerSolicitud(id: string) {
