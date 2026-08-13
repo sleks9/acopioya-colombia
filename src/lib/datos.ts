@@ -111,6 +111,46 @@ export async function contarReunidas(): Promise<number> {
   return count ?? 0;
 }
 
+// ── Solicitudes de ayuda ──────────────────────────────────────────────────
+
+const COLUMNAS_SOLICITUD = [
+  "id", "titulo", "descripcion", "tipo", "departamento", "municipio",
+  "barrio_vereda", "lat", "lng", "personas", "necesita", "urgencia", "estado",
+  "telefono_publico", "foto_url", "verificacion", "confirmaciones",
+  "creado", "actualizado", "frescura",
+].join(",");
+
+export async function obtenerSolicitudes(incluirCubiertas = false) {
+  let q = supabase
+    .from("solicitudes_publicas")
+    .select(COLUMNAS_SOLICITUD)
+    // Lo crítico primero: aquí el orden no es cronológico, es de urgencia.
+    .order("urgencia", { ascending: true })
+    .order("actualizado", { ascending: false });
+
+  if (!incluirCubiertas) q = q.neq("estado", "cubierta");
+
+  const { data, error } = await q;
+  if (error) {
+    console.error("obtenerSolicitudes:", error.message);
+    return [];
+  }
+  return (data ?? []) as unknown as import("./solicitudes").Solicitud[];
+}
+
+export async function obtenerSolicitud(id: string) {
+  const { data, error } = await supabase
+    .from("solicitudes_publicas")
+    .select(COLUMNAS_SOLICITUD)
+    .eq("id", id)
+    .maybeSingle();
+  if (error) {
+    console.error("obtenerSolicitud:", error.message);
+    return null;
+  }
+  return (data as unknown as import("./solicitudes").Solicitud) ?? null;
+}
+
 export type EventoHistorial = {
   tipo: string;
   detalle: Record<string, unknown> | null;

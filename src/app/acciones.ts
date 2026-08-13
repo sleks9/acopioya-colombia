@@ -145,6 +145,112 @@ export async function actualizarCentro(
   return { ok: true };
 }
 
+// ── Solicitudes de ayuda ──────────────────────────────────────────────────
+
+export type ResultadoSolicitud =
+  | { ok: true; id: string; token: string }
+  | { ok: false; error: string };
+
+export async function crearSolicitud(formData: FormData): Promise<ResultadoSolicitud> {
+  const texto = (k: string) => {
+    const v = formData.get(k);
+    return typeof v === "string" && v.trim() ? v.trim() : null;
+  };
+
+  const titulo = texto("titulo");
+  const descripcion = texto("descripcion");
+  const tipo = texto("tipo");
+  const departamento = texto("departamento");
+  const municipio = texto("ciudad");
+  const barrio = texto("barrio_vereda");
+  const necesita = formData.getAll("necesita").map(String).filter(Boolean);
+  const lat = Number(formData.get("lat"));
+  const lng = Number(formData.get("lng"));
+  const personas = Number(formData.get("personas"));
+
+  if (!titulo || !descripcion || !tipo || !departamento || !municipio || !barrio) {
+    return { ok: false, error: "Faltan datos obligatorios." };
+  }
+  if (necesita.length === 0) {
+    return { ok: false, error: "Marca al menos una necesidad." };
+  }
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return { ok: false, error: "Marca la zona en el mapa." };
+  }
+
+  const contactoPublico = formData.get("contacto_publico") === "on";
+
+  const { data, error } = await supabase.rpc("crear_solicitud", {
+    p_titulo: titulo,
+    p_descripcion: descripcion,
+    p_tipo: tipo,
+    p_departamento: departamento,
+    p_municipio: municipio,
+    p_barrio_vereda: barrio,
+    p_lat: lat,
+    p_lng: lng,
+    p_necesita: necesita,
+    p_urgencia: texto("urgencia") ?? "normal",
+    p_personas: Number.isFinite(personas) && personas > 0 ? Math.round(personas) : null,
+    p_foto_url: texto("foto_url"),
+    p_telefono: contactoPublico ? texto("telefono") : null,
+    p_contacto_publico: contactoPublico,
+    p_ip_hash: await hashIp(),
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  const fila = Array.isArray(data) ? data[0] : data;
+  if (!fila?.id || !fila?.token) {
+    return { ok: false, error: "No se pudo publicar la solicitud." };
+  }
+
+  revalidatePath("/solicitudes");
+  return { ok: true, id: fila.id as string, token: fila.token as string };
+}
+
+export async function votarSolicitud(
+  id: string,
+  voto: "confirmacion" | "reporte"
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase.rpc("votar_solicitud", {
+    p_id: id,
+    p_voto: voto,
+    p_ip_hash: await hashIp(),
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/solicitudes");
+  revalidatePath(`/solicitud/${id}`);
+  return { ok: true };
+}
+
+export async function obtenerSolicitudPorToken(token: string) {
+  const { data, error } = await supabase.rpc("solicitud_por_token", { p_token: token });
+  if (error) {
+    console.error("obtenerSolicitudPorToken:", error.message);
+    return null;
+  }
+  const fila = Array.isArray(data) ? data[0] : data;
+  return fila ?? null;
+}
+
+export async function actualizarSolicitud(
+  token: string,
+  campos: { estado?: string; descripcion?: string | null; necesita?: string[]; urgencia?: string; foto_url?: string | null }
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase.rpc("actualizar_solicitud", {
+    p_token: token,
+    p_estado: campos.estado ?? null,
+    p_descripcion: campos.descripcion ?? null,
+    p_necesita: campos.necesita ?? null,
+    p_urgencia: campos.urgencia ?? null,
+    p_foto_url: campos.foto_url ?? null,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/solicitudes");
+  return { ok: true };
+}
+
 // ── Mascotas ──────────────────────────────────────────────────────────────
 
 export type ResultadoMascota =
