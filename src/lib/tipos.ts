@@ -79,7 +79,7 @@ export const ETIQUETA_VERIFICACION: Record<Verificacion, string> = {
 export const ETIQUETA_FRESCURA: Record<Frescura, string> = {
   fresco: "Actualizado hace poco",
   dudoso: "Posiblemente desactualizado",
-  viejo: "Sin actualizar hace más de un día",
+  viejo: "Sin actualizar hace días",
 };
 
 /**

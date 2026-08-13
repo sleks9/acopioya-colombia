@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, BadgeCheck, Clock, MapPinOff, ShieldOff, Users } from "lucide-react";
+import {
+  ArrowRight, BadgeCheck, Clock, HandHeart, MapPinOff, PawPrint,
+  ShieldOff, Users,
+} from "lucide-react";
 
 export const metadata: Metadata = {
   title: "Cómo funciona",
@@ -25,14 +28,82 @@ export default function ComoFunciona() {
           muestra siempre.
         </p>
         <ul className="ml-5 list-disc space-y-1">
-          <li><strong>Menos de 8 horas:</strong> se muestra normal.</li>
-          <li><strong>Entre 8 y 24 horas:</strong> se marca como posiblemente desactualizado.</li>
-          <li><strong>Más de 24 horas:</strong> sale del mapa por defecto.</li>
+          <li><strong>Menos de 12 horas:</strong> se muestra normal.</li>
+          <li><strong>Entre 12 y 72 horas:</strong> se marca como posiblemente desactualizado.</li>
+          <li><strong>Más de 72 horas:</strong> sale del mapa por defecto.</li>
         </ul>
         <p>
           Nadie tiene que acordarse de borrar nada: un punto que dejó de
           actualizarse desaparece solo. Es preferible mostrar menos puntos que
           mandar gente a una dirección muerta.
+        </p>
+        <p>
+          Estas ventanas se ampliaron a propósito. Con umbrales muy cortos el
+          mapa se vaciaba antes de que alguien alcanzara a confirmar los puntos,
+          y un mapa vacío no ayuda a nadie. El aviso de duda sigue apareciendo
+          temprano; lo que cambia es que el dato permanece, marcado, en vez de
+          esfumarse.
+        </p>
+      </Bloque>
+
+      <Bloque Icono={Clock} titulo="Abierto ahora significa abierto ahora">
+        <p>
+          El estado de un punto —abierto, lleno, cerrado— dice si está
+          recibiendo donaciones, no si su puerta está abierta a esta hora. Son
+          cosas distintas y confundirlas manda gente de noche a un sitio cerrado.
+        </p>
+        <p>
+          Por eso el horario publicado se cruza con el reloj, <strong>en hora de
+          Colombia</strong>: un punto de Quibdó abre a las 8 de Colombia aunque
+          lo consulten desde Madrid. Cada tarjeta dice si está abierto o cerrado
+          en este momento.
+        </p>
+        <p>
+          Cuando el horario no se puede interpretar, no se afirma nada. «No sé»
+          y «está cerrado» son cosas distintas, y afirmar cualquiera sin
+          fundamento sería el mismo problema con otro signo.
+        </p>
+      </Bloque>
+
+      <Bloque Icono={PawPrint} titulo="Las mascotas se cruzan por cercanía">
+        <p>
+          Aquí se publican las dos caras: <strong>se perdió</strong> y{" "}
+          <strong>me encontré una</strong>. Esa segunda mitad es la que casi
+          nadie publica y la que hace que esto funcione.
+        </p>
+        <p>
+          Una mascota casi siempre aparece cerca de donde se perdió, así que la
+          proximidad es la señal más fuerte que existe para reunirlas. Al abrir
+          un reporte de mascota perdida se muestran automáticamente las
+          encontradas <strong>a menos de 3 km</strong>, de la misma especie y en
+          fechas compatibles: una encontrada antes de la pérdida no puede ser la
+          misma. Eso es justo lo que un muro ordenado por fecha hace mal.
+        </p>
+        <p>
+          El botón <strong>«¡Ya apareció!»</strong> está abierto a cualquiera, no
+          solo al dueño: quien la vio de vuelta en casa sí avisa, mientras el
+          dueño suele estar celebrando en vez de actualizando una página. Con
+          tres avisos el caso se cierra solo, y los reportes sin actividad se
+          archivan a los 45 días.
+        </p>
+      </Bloque>
+
+      <Bloque Icono={HandHeart} titulo="Las solicitudes protegen a quien pide">
+        <p>
+          Una solicitud describe una <strong>necesidad</strong>, no señala a una
+          familia. Por eso la ubicación llega hasta barrio o vereda y nunca a una
+          casa, y el teléfono solo aparece si quien publicó lo autorizó.
+        </p>
+        <p>
+          Quien acaba de perderlo todo no debería quedar marcado en un mapa como
+          «aquí hay gente vulnerable y aquí van a llegar cosas». Cuando no hay
+          teléfono, la coordinación se hace por la alcaldía o la junta de acción
+          comunal del sector.
+        </p>
+        <p>
+          Marcar una solicitud como <strong>cubierta</strong> es la acción más
+          visible del panel de quien la publicó: una necesidad ya satisfecha que
+          sigue abierta desvía ayuda de quien todavía la espera.
         </p>
       </Bloque>
 
