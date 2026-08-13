@@ -7,6 +7,7 @@ import {
   InsigniaPrecision,
   InsigniaVerificacion,
 } from "./Insignias";
+import { MiniaturaPunto } from "./MiniaturaPunto";
 
 export function TarjetaCentro({
   centro,
@@ -25,9 +26,17 @@ export function TarjetaCentro({
     >
       <Link
         href={`/centro/${centro.id}`}
-        className="presionable group block h-full rounded-2xl border border-[var(--borde)] bg-[var(--superficie)] p-4 shadow-[var(--sombra-1)]"
+        className="presionable group block h-full rounded-2xl border border-[var(--borde)] bg-[var(--superficie)] p-3 shadow-[var(--sombra-1)]"
       >
-        <div className="mb-2 flex flex-wrap items-center gap-1.5">
+        <MiniaturaPunto
+          lat={centro.lat}
+          lng={centro.lng}
+          estado={centro.estado}
+          fotoUrl={centro.foto_url}
+          nombre={centro.nombre}
+        />
+
+        <div className="mb-2 mt-3 flex flex-wrap items-center gap-1.5">
           <InsigniaEstado estado={centro.estado} />
           <InsigniaVerificacion verificacion={centro.verificacion} />
           <InsigniaFrescura frescura={centro.frescura} />

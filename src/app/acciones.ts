@@ -145,6 +145,118 @@ export async function actualizarCentro(
   return { ok: true };
 }
 
+// ── Mascotas ──────────────────────────────────────────────────────────────
+
+export type ResultadoMascota =
+  | { ok: true; id: string; token: string }
+  | { ok: false; error: string };
+
+export async function reportarMascota(
+  formData: FormData
+): Promise<ResultadoMascota> {
+  const texto = (k: string) => {
+    const v = formData.get(k);
+    return typeof v === "string" && v.trim() ? v.trim() : null;
+  };
+
+  const caso = texto("caso");
+  const especie = texto("especie");
+  const color = texto("color");
+  const fotoUrl = texto("foto_url");
+  const departamento = texto("departamento");
+  const municipio = texto("ciudad");
+  const fecha = texto("fecha_suceso");
+  const lat = Number(formData.get("lat"));
+  const lng = Number(formData.get("lng"));
+
+  if (!caso || !especie || !color || !departamento || !municipio || !fecha) {
+    return { ok: false, error: "Faltan datos obligatorios." };
+  }
+  // Sin foto no se puede reconocer al animal: se corta aquí y no en la base.
+  if (!fotoUrl) {
+    return { ok: false, error: "La foto es obligatoria: sin ella nadie puede reconocerlo." };
+  }
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
+    return { ok: false, error: "Marca en el mapa dónde fue." };
+  }
+
+  const contactoPublico = formData.get("contacto_publico") === "on";
+
+  const { data, error } = await supabase.rpc("crear_mascota", {
+    p_caso: caso,
+    p_especie: especie,
+    p_color: color,
+    p_foto_url: fotoUrl,
+    p_departamento: departamento,
+    p_municipio: municipio,
+    p_lat: lat,
+    p_lng: lng,
+    p_fecha_suceso: fecha,
+    p_nombre: texto("nombre"),
+    p_sexo: texto("sexo") ?? "desconocido",
+    p_tamano: texto("tamano") ?? "mediano",
+    p_senas: texto("senas"),
+    p_chip_placa: texto("chip_placa"),
+    p_telefono: contactoPublico ? texto("telefono") : null,
+    p_contacto_publico: contactoPublico,
+    p_ip_hash: await hashIp(),
+  });
+
+  if (error) return { ok: false, error: error.message };
+
+  const fila = Array.isArray(data) ? data[0] : data;
+  if (!fila?.id || !fila?.token) {
+    return { ok: false, error: "No se pudo publicar el reporte." };
+  }
+
+  revalidatePath("/mascotas");
+  return { ok: true, id: fila.id as string, token: fila.token as string };
+}
+
+/** "¡Apareció!" abierto a cualquiera: es lo que evita que el listado envejezca. */
+export async function avisarMascota(
+  id: string,
+  aviso: "reunida" | "reporte"
+): Promise<{ ok: boolean; estado?: string; error?: string }> {
+  const { data, error } = await supabase.rpc("avisar_mascota", {
+    p_id: id,
+    p_aviso: aviso,
+    p_ip_hash: await hashIp(),
+  });
+  if (error) return { ok: false, error: error.message };
+
+  revalidatePath("/mascotas");
+  revalidatePath(`/mascota/${id}`);
+  return { ok: true, estado: data as string };
+}
+
+export async function obtenerMascotaPorToken(token: string) {
+  const { data, error } = await supabase.rpc("mascota_por_token", { p_token: token });
+  if (error) {
+    console.error("obtenerMascotaPorToken:", error.message);
+    return null;
+  }
+  const fila = Array.isArray(data) ? data[0] : data;
+  return fila ?? null;
+}
+
+export async function actualizarMascota(
+  token: string,
+  campos: { estado?: string; senas?: string | null; foto_url?: string | null }
+): Promise<{ ok: boolean; error?: string }> {
+  const { error } = await supabase.rpc("actualizar_mascota", {
+    p_token: token,
+    p_estado: campos.estado ?? null,
+    p_senas: campos.senas ?? null,
+    p_foto_url: campos.foto_url ?? null,
+    p_telefono: null,
+    p_contacto_publico: null,
+  });
+  if (error) return { ok: false, error: error.message };
+  revalidatePath("/mascotas");
+  return { ok: true };
+}
+
 /** Confirmar o desmentir un punto. Es el motor de la auto-moderacion. */
 export async function votarCentro(
   centroId: string,

@@ -49,6 +49,68 @@ export async function obtenerCentro(id: string): Promise<Centro | null> {
   return (data as unknown as Centro) ?? null;
 }
 
+// ── Mascotas ──────────────────────────────────────────────────────────────
+
+const COLUMNAS_MASCOTA = [
+  "id", "caso", "especie", "nombre", "sexo", "tamano", "color", "senas",
+  "chip_placa", "departamento", "municipio", "lat", "lng", "fecha_suceso",
+  "foto_url", "telefono_publico", "estado", "verificacion",
+  "confirmaciones", "avisos_reunida", "creado", "actualizado", "dias_desde",
+].join(",");
+
+export async function obtenerMascotas(caso?: "perdida" | "encontrada") {
+  let q = supabase
+    .from("mascotas_publicas")
+    .select(COLUMNAS_MASCOTA)
+    .eq("estado", "activa")
+    .order("fecha_suceso", { ascending: false });
+
+  if (caso) q = q.eq("caso", caso);
+
+  const { data, error } = await q;
+  if (error) {
+    console.error("obtenerMascotas:", error.message);
+    return [];
+  }
+  return (data ?? []) as unknown as import("./mascotas").Mascota[];
+}
+
+export async function obtenerMascota(id: string) {
+  const { data, error } = await supabase
+    .from("mascotas_publicas")
+    .select(COLUMNAS_MASCOTA)
+    .eq("id", id)
+    .maybeSingle();
+  if (error) {
+    console.error("obtenerMascota:", error.message);
+    return null;
+  }
+  return (data as unknown as import("./mascotas").Mascota) ?? null;
+}
+
+/** Reportes del lado contrario a menos de 3 km. El corazón de la sección. */
+export async function obtenerCoincidencias(id: string) {
+  const { data, error } = await supabase.rpc("coincidencias_mascota", {
+    p_id: id,
+    p_km: 3,
+  });
+  if (error) {
+    console.error("obtenerCoincidencias:", error.message);
+    return [];
+  }
+  return (data ?? []) as import("./mascotas").Coincidencia[];
+}
+
+/** Para el contador de la portada: los reencuentros son lo que se celebra. */
+export async function contarReunidas(): Promise<number> {
+  const { count, error } = await supabase
+    .from("mascotas")
+    .select("id", { count: "exact", head: true })
+    .eq("estado", "reunida");
+  if (error) return 0;
+  return count ?? 0;
+}
+
 export type EventoHistorial = {
   tipo: string;
   detalle: Record<string, unknown> | null;

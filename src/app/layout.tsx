@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
-import { Heart, MapPin, Plus } from "lucide-react";
+import { Heart, MapPin, PawPrint, Plus, Users } from "lucide-react";
 import "./globals.css";
 
 // Autoalojada por next/font: sin peticion a un dominio externo y sin FOIT.
@@ -66,19 +66,21 @@ export default function RootLayout({
               </span>
             </Link>
 
-            <nav className="ml-2 hidden gap-1 sm:flex" aria-label="Principal">
-              <Link
-                href="/mapa"
-                className="presionable rounded-lg px-3 py-2 text-sm font-medium text-[var(--texto-suave)] hover:text-[var(--texto)]"
-              >
-                Ver el mapa
-              </Link>
-              <Link
-                href="/como-funciona"
-                className="presionable rounded-lg px-3 py-2 text-sm font-medium text-[var(--texto-suave)] hover:text-[var(--texto)]"
-              >
-                Cómo funciona
-              </Link>
+            <nav className="ml-2 hidden gap-1 md:flex" aria-label="Principal">
+              {[
+                { href: "/mapa", texto: "Centros de acopio" },
+                { href: "/mascotas", texto: "Mascotas" },
+                { href: "/buscar-personas", texto: "Buscar personas" },
+                { href: "/como-funciona", texto: "Cómo funciona" },
+              ].map((e) => (
+                <Link
+                  key={e.href}
+                  href={e.href}
+                  className="presionable rounded-lg px-3 py-2 text-sm font-medium text-[var(--texto-suave)] hover:text-[var(--texto)]"
+                >
+                  {e.texto}
+                </Link>
+              ))}
             </nav>
 
             <Link
@@ -91,9 +93,38 @@ export default function RootLayout({
           </div>
         </header>
 
-        <main id="contenido" className="flex-1">
+        <main id="contenido" className="flex-1 pb-20 md:pb-0">
           {children}
         </main>
+
+        {/*
+          Con cuatro secciones la barra superior ya no cabe en movil. Menu
+          inferior, que ademas queda al alcance del pulgar: esto se consulta
+          con una mano y a veces con prisa.
+        */}
+        <nav
+          aria-label="Secciones"
+          className="fixed inset-x-0 bottom-0 z-40 border-t border-[var(--borde)] bg-[var(--superficie)]/95 backdrop-blur-md md:hidden"
+        >
+          <ul className="mx-auto flex max-w-lg">
+            {[
+              { href: "/mapa", texto: "Acopios", Icono: MapPin },
+              { href: "/mascotas", texto: "Mascotas", Icono: PawPrint },
+              { href: "/buscar-personas", texto: "Personas", Icono: Users },
+              { href: "/reportar", texto: "Reportar", Icono: Plus },
+            ].map(({ href, texto, Icono }) => (
+              <li key={href} className="flex-1">
+                <Link
+                  href={href}
+                  className="presionable flex min-h-[3.75rem] flex-col items-center justify-center gap-0.5 text-[var(--texto-suave)]"
+                >
+                  <Icono size={20} aria-hidden />
+                  <span className="text-[11px] font-medium">{texto}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
         <footer className="mt-12 border-t border-[var(--borde)] bg-[var(--superficie)]">
           <div className="mx-auto max-w-6xl space-y-5 px-4 py-8">
@@ -112,7 +143,9 @@ export default function RootLayout({
               <nav aria-label="Secciones">
                 <p className="text-sm font-semibold">Navegación</p>
                 <ul className="mt-1.5 space-y-1 text-sm text-[var(--texto-suave)]">
-                  <li><Link href="/mapa" className="hover:underline">Ver el mapa</Link></li>
+                  <li><Link href="/mapa" className="hover:underline">Centros de acopio</Link></li>
+                  <li><Link href="/mascotas" className="hover:underline">Mascotas perdidas</Link></li>
+                  <li><Link href="/buscar-personas" className="hover:underline">Buscar a una persona</Link></li>
                   <li><Link href="/reportar" className="hover:underline">Reportar un punto</Link></li>
                   <li><Link href="/como-funciona" className="hover:underline">Cómo funciona</Link></li>
                   <li><Link href="/api/centros.json" className="hover:underline">Datos abiertos (JSON)</Link></li>

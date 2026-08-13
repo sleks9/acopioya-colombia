@@ -16,6 +16,50 @@ import type { StyleSpecification } from "maplibre-gl";
  * de acopios eso no cambia nada: lo que importa es ubicar el punto.
  */
 
+/**
+ * Miniatura estática de un punto, para las tarjetas que no tienen foto.
+ *
+ * No hace falta un servicio de "static maps" con API key: basta la tesela
+ * rastera que contiene el punto (unos 30 KB) mas la posicion exacta del punto
+ * DENTRO de ella. La tarjeta la desplaza para centrarlo.
+ *
+ * Ventaja secundaria: los puntos de una misma zona comparten tesela, asi que el
+ * cache del navegador cubre buena parte del listado con una sola descarga.
+ */
+export type Miniatura = {
+  url: string;
+  /** Posición del punto dentro de la tesela, en px sobre 256. */
+  px: number;
+  py: number;
+  tamano: number;
+};
+
+/**
+ * Zoom 13 y no 14: a menor zoom cada tesela cubre mas area, asi que mas puntos
+ * comparten la misma y el navegador la descarga una sola vez. Medido sobre los
+ * 31 puntos sin foto: 25 teselas a z14 (~0,73 MB) contra 18 a z13 (~0,53 MB),
+ * un 27% menos, y a z13 todavia se ven las calles. A z12 se ahorra poco mas
+ * pero la miniatura ya no ubica nada.
+ */
+export function miniaturaDe(lat: number, lng: number, zoom = 13): Miniatura {
+  const n = 2 ** zoom;
+  const x = ((lng + 180) / 360) * n;
+  const latR = (lat * Math.PI) / 180;
+  const y = ((1 - Math.log(Math.tan(latR) + 1 / Math.cos(latR)) / Math.PI) / 2) * n;
+
+  const tx = Math.floor(x);
+  const ty = Math.floor(y);
+  // Subdominio estable por tesela: reparte la carga sin romper el cache.
+  const sub = ["a", "b", "c"][(tx + ty) % 3];
+
+  return {
+    url: `https://${sub}.basemaps.cartocdn.com/light_all/${zoom}/${tx}/${ty}.png`,
+    px: Math.round((x % 1) * 256),
+    py: Math.round((y % 1) * 256),
+    tamano: 256,
+  };
+}
+
 /** En pantallas retina la tesela @2x pesa casi el triple. Solo si hay red. */
 function usarAltaDensidad(): boolean {
   if (typeof window === "undefined") return false;
