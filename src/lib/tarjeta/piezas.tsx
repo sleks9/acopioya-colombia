@@ -177,6 +177,69 @@ export function Bloque({
   );
 }
 
+/**
+ * La misma información que `Bloque`, en una línea.
+ *
+ * En el lienzo apaisado solo hay 363 px de alto para todo el contenido, y una
+ * caja con fondo, título y relleno se come 128 de ellos —un tercio— dejando el
+ * teléfono fuera del recorte. Aquí el icono y el color siguen distinguiendo lo
+ * que se recibe de lo que no, que es lo que importa, sin gastar el alto de una
+ * caja.
+ */
+export function Resumen({
+  m,
+  tono,
+  titulo,
+  items,
+  resto,
+}: {
+  m: Medidas;
+  tono: "si" | "no";
+  titulo: string;
+  items: string[];
+  resto: number;
+}) {
+  if (!items.length) return null;
+  const color = tono === "si" ? C.primarioFuerte : C.peligro;
+  const ic: Icono = tono === "si" ? "check" : "equis";
+  const tam = Math.round(m.cuerpo * 0.95);
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        flexShrink: 0,
+        marginTop: Math.round(m.hueco * 0.7),
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={icono(ic, color, 3.2)} width={tam} height={tam} alt="" style={{ flexShrink: 0 }} />
+      <span
+        style={{
+          fontSize: m.cuerpo,
+          fontWeight: 700,
+          color,
+          marginLeft: Math.round(m.cuerpo * 0.3),
+          flexShrink: 0,
+        }}
+      >
+        {titulo}
+      </span>
+      <span
+        style={{
+          fontSize: m.cuerpo,
+          color: C.texto,
+          marginLeft: Math.round(m.cuerpo * 0.3),
+          overflow: "hidden",
+        }}
+      >
+        {resto > 0 ? `${items.join(", ")} y ${resto} más` : items.join(", ")}
+      </span>
+    </div>
+  );
+}
+
 /** Aviso en ámbar: la insignia de ubicación aproximada, la frescura dudosa. */
 export function Aviso({ m, children }: { m: Medidas; children: string }) {
   const tam = Math.round(m.cuerpo * 1.05);

@@ -76,8 +76,11 @@ const BASE: Record<Formato, Omit<Medidas, "formato">> = {
     // un chat donde tocar el enlace es más fácil que escanear nada. El QR
     // existe para la imagen que se reenvía suelta y pierde el enlace por el
     // camino; aquí solo robaría el sitio que necesitan los datos.
+    // Titular a 50 y no a 54: a 54 un nombre largo se va a dos líneas y arrastra
+    // fuera del recorte la última línea de contenido, que queda cortada por la
+    // mitad. Ocho píxeles menos compran una línea entera.
     ancho: 1200, alto: 630, vertical: false,
-    sello: 28, titular: 54, subtitulo: 28, cuerpo: 25, pie: 19,
+    sello: 28, titular: 50, subtitulo: 28, cuerpo: 25, pie: 19,
     margen: 52, aire_arriba: 20, aire_abajo: 20, hueco: 16, radio: 20, qr: 0,
   },
 };

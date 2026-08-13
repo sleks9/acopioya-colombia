@@ -181,6 +181,22 @@ legible tras reescalar a 800 px y bajar la calidad JPEG a 35.
 El formato `enlace` es el único sin QR, a propósito: esa imagen solo aparece
 pegada *junto* al enlace, donde tocarlo es más fácil que escanear nada.
 
+### El apaisado tiene 390 px y no perdona
+
+`enlace` deja **390 px de alto** para todo el contenido, y ahí no hay margen
+para adornos: la caja con fondo y título de «están recibiendo» se comía 128 de
+ellos y empujaba el teléfono fuera del recorte, partido por la mitad. En ese
+lienzo las listas van en una línea de texto con su icono y su color, no en
+caja, y el titular baja de 54 a 50 px porque ocho píxeles compran una línea
+entera.
+
+Como aun así no hay garantía de que todo quepa, **el orden importa**: lo que se
+recorta es lo de abajo, así que abajo va lo prescindible. En el apaisado el
+teléfono se coloca *antes* de las listas — un punto sin la lista de insumos
+sigue sirviendo, porque llamas y preguntas; sin el teléfono, no. La misma
+lógica pone el aviso de «ubicación aproximada» arriba del todo: es una
+advertencia de seguridad y no puede ser lo primero que se caiga.
+
 ### Por qué se genera en el servidor
 
 Con `ImageResponse` de `next/og`, no con una librería de captura en el

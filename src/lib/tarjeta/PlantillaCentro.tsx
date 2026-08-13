@@ -15,7 +15,7 @@ import { ETIQUETA_PRECISION, nombreInsumo } from "@/lib/tipos";
 import type { Medidas } from "./formatos";
 import { COLOR_ESTADO } from "./marca";
 import { Marco } from "./Marco";
-import { Aviso, Bloque, Dato, FotoElastica, Sub, Titular } from "./piezas";
+import { Aviso, Bloque, Dato, FotoElastica, Resumen, Sub, Titular } from "./piezas";
 import { primeros, recortar } from "./texto";
 
 export function PlantillaCentro({
@@ -31,17 +31,17 @@ export function PlantillaCentro({
 }) {
   const compacto = !m.vertical;
   const si = primeros(c.necesita, compacto ? 3 : 5, nombreInsumo);
-  const no = primeros(c.no_necesita, compacto ? 2 : 4, nombreInsumo);
+  const no = primeros(c.no_necesita, compacto ? 3 : 4, nombreInsumo);
 
-  // En apaisado solo cabe un bloque; el «NO llevar» es el que aporta más.
   const mostrarNo = no.visibles.length > 0;
-  const mostrarSi = si.visibles.length > 0 && (!compacto || !mostrarNo);
+  const mostrarSi = si.visibles.length > 0;
 
   // Solo la historia tiene alto de sobra para una foto; en las otras dos el
   // sitio lo necesitan los datos.
   const conFoto = m.formato === "historia" && Boolean(foto);
 
-  const nombre = recortar(c.nombre, compacto ? 46 : 48);
+  // 40 en apaisado: es lo que entra en una línea a ese tamaño de titular.
+  const nombre = recortar(c.nombre, compacto ? 40 : 48);
 
   /**
    * El lienzo tiene un alto fijo y el contenido no: un nombre de tres líneas
@@ -71,25 +71,53 @@ export function PlantillaCentro({
         </Aviso>
       )}
 
-      {mostrarSi && (
-        <Bloque m={m} tono="si" titulo="ESTÁN RECIBIENDO" items={si.visibles} resto={si.resto} />
-      )}
-      {mostrarNo && (
-        <Bloque m={m} tono="no" titulo="NO LLEVAR" items={no.visibles} resto={no.resto} />
-      )}
-
-      <div style={{ display: "flex", flexDirection: "column", marginTop: m.hueco }}>
-        {/* El teléfono antes que el horario: es el dato más accionable de
-            todos, el que evita el viaje en balde. */}
-        {c.telefono_publico && (
+      {/* En el apaisado el teléfono va ANTES de las listas.
+          El alto disponible ahí son 390 px y no hay garantía de que quepa
+          todo: un nombre de dos líneas más el aviso de ubicación ya se comen
+          el margen. Lo que sobre tiene que caerse por abajo, así que abajo va
+          lo prescindible. Un centro sin la lista de insumos sigue sirviendo
+          —llamas y preguntas—; sin el teléfono, no. */}
+      {compacto && c.telefono_publico && (
+        <div style={{ display: "flex", flexDirection: "column", flexShrink: 0 }}>
           <Dato m={m} ic="telefono" fuerte>
             {c.telefono_publico}
           </Dato>
-        )}
-        {c.horario && !compacto && (
-          <Dato m={m} ic="reloj">{recortar(c.horario, 60)}</Dato>
+        </div>
+      )}
+
+      {/* Contenedor con `flexDirection` explícito y no un fragmento: satori no
+          propaga el layout del padre a través de `<>…</>` y los hijos acaban
+          uno al lado del otro. */}
+      <div style={{ display: "flex", flexDirection: "column", flexShrink: 0 }}>
+        {compacto ? (
+          <div style={{ display: "flex", flexDirection: "column", flexShrink: 0 }}>
+            <Resumen m={m} tono="si" titulo="Reciben:" items={si.visibles} resto={si.resto} />
+            <Resumen m={m} tono="no" titulo="NO llevar:" items={no.visibles} resto={no.resto} />
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", flexShrink: 0 }}>
+            {mostrarSi && (
+              <Bloque m={m} tono="si" titulo="ESTÁN RECIBIENDO" items={si.visibles} resto={si.resto} />
+            )}
+            {mostrarNo && (
+              <Bloque m={m} tono="no" titulo="NO LLEVAR" items={no.visibles} resto={no.resto} />
+            )}
+          </div>
         )}
       </div>
+
+      {!compacto && (
+        <div style={{ display: "flex", flexDirection: "column", marginTop: m.hueco }}>
+          {/* El teléfono antes que el horario: es el dato más accionable de
+              todos, el que evita el viaje en balde. */}
+          {c.telefono_publico && (
+            <Dato m={m} ic="telefono" fuerte>
+              {c.telefono_publico}
+            </Dato>
+          )}
+          {c.horario && <Dato m={m} ic="reloj">{recortar(c.horario, 60)}</Dato>}
+        </div>
+      )}
 
       {/* Mínimo bajo a propósito: si el punto trae mucho texto, la foto se
           encoge hasta desaparecer en vez de desbordar el lienzo y salir

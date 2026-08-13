@@ -111,12 +111,36 @@ export function Marco({
           />
         )}
         <div style={{ display: "flex", flexDirection: "column", flex: 1, overflow: "hidden" }}>
-          <span style={{ fontSize: m.pie * 1.3, fontWeight: 700, color: C.texto }}>
-            AcopioYa · {dominio()}
-          </span>
-          <span style={{ fontSize: m.pie, color: C.textoSuave, marginTop: m.pie * 0.28 }}>
-            Datos del {selloDeTiempo()}
-          </span>
+          {/* Sin QR el lienzo es el apaisado, donde cada píxel de alto se lo
+              quita al contenido: la identidad y la fecha van en la misma
+              línea en vez de en dos. */}
+          {m.qr > 0 ? (
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span style={{ fontSize: m.pie * 1.3, fontWeight: 700, color: C.texto }}>
+                AcopioYa · {dominio()}
+              </span>
+              <span style={{ fontSize: m.pie, color: C.textoSuave, marginTop: m.pie * 0.28 }}>
+                Datos del {selloDeTiempo()}
+              </span>
+            </div>
+          ) : (
+            // Separación con margen, no con espacios en el texto: satori los
+            // colapsa y las dos partes quedaban pegadas.
+            <div style={{ display: "flex", alignItems: "baseline" }}>
+              <span style={{ fontSize: m.pie * 1.15, fontWeight: 700, color: C.texto }}>
+                AcopioYa · {dominio()}
+              </span>
+              <span
+                style={{
+                  fontSize: m.pie,
+                  color: C.textoSuave,
+                  marginLeft: Math.round(m.pie * 0.5),
+                }}
+              >
+                Datos del {selloDeTiempo()}
+              </span>
+            </div>
+          )}
           <span
             style={{
               fontSize: m.pie,

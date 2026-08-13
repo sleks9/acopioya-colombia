@@ -12,7 +12,7 @@ import { ESTADOS, nombreNecesidad } from "@/lib/solicitudes";
 import type { Medidas } from "./formatos";
 import { COLOR_URGENCIA } from "./marca";
 import { Marco } from "./Marco";
-import { Bloque, Dato, Foto, Sello, Sub, Titular } from "./piezas";
+import { Bloque, Dato, Foto, Resumen, Sello, Sub, Titular } from "./piezas";
 import { primeros, recortar } from "./texto";
 
 export function PlantillaSolicitud({
@@ -32,26 +32,34 @@ export function PlantillaSolicitud({
 
   return (
     <Marco m={m} banda={COLOR_URGENCIA[s.urgencia]} qr={qr}>
-      <Titular m={m}>{recortar(s.titulo, compacto ? 48 : 62)}</Titular>
+      {/* 40 en apaisado: lo que entra en una línea a ese tamaño de titular.
+          Con dos, la última línea de contenido queda cortada por la mitad. */}
+      <Titular m={m}>{recortar(s.titulo, compacto ? 40 : 62)}</Titular>
       {/* Solo barrio o vereda y municipio. Nunca más preciso que esto. */}
       <Sub m={m}>{recortar(`${s.barrio_vereda} · ${s.municipio}, ${s.departamento}`, compacto ? 58 : 80)}</Sub>
 
-      <Bloque m={m} tono="si" titulo="QUÉ NECESITAN" items={nec.visibles} resto={nec.resto} />
-
-      {!compacto && (
-        <div style={{ display: "flex", flexDirection: "column", marginTop: Math.round(m.hueco * 0.4) }}>
-          {s.personas && (
-            <Dato m={m} ic="usuarios">{`${s.personas} personas beneficiadas`}</Dato>
-          )}
-          {s.telefono_publico ? (
-            <Dato m={m} ic="telefono" fuerte>
-              {s.telefono_publico}
-            </Dato>
-          ) : (
-            <Dato m={m} ic="pin">Sin teléfono público: coordina desde la ficha</Dato>
-          )}
-        </div>
+      {compacto ? (
+        <Resumen m={m} tono="si" titulo="Necesitan:" items={nec.visibles} resto={nec.resto} />
+      ) : (
+        <Bloque m={m} tono="si" titulo="QUÉ NECESITAN" items={nec.visibles} resto={nec.resto} />
       )}
+
+      <div style={{ display: "flex", flexDirection: "column", flexShrink: 0, marginTop: Math.round(m.hueco * 0.4) }}>
+        {s.personas && (
+          <Dato m={m} ic="usuarios">{`${s.personas} personas beneficiadas`}</Dato>
+        )}
+        {/* El teléfono cabe también en el apaisado: sin él la tarjeta informa
+            pero no permite hacer nada. */}
+        {s.telefono_publico ? (
+          <Dato m={m} ic="telefono" fuerte>
+            {s.telefono_publico}
+          </Dato>
+        ) : (
+          !compacto && (
+            <Dato m={m} ic="pin">Sin teléfono público: coordina desde la ficha</Dato>
+          )
+        )}
+      </div>
 
       {s.estado !== "abierta" && <Sello m={m}>{ESTADOS[s.estado].nombre}</Sello>}
 
