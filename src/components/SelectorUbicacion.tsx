@@ -1,10 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
+import {
+  useCallback, useEffect, useMemo, useRef, useState, type ComponentType,
+} from "react";
 import {
   AlertCircle, Crosshair, Loader2, MapIcon, MapPin, Search, X,
 } from "lucide-react";
-import { autocompletar, buscarDirecciones, type Sugerencia } from "@/lib/geocodificar";
+import {
+  autocompletar, buscarDirecciones, type Contexto, type Sugerencia,
+} from "@/lib/geocodificar";
 import type { Precision } from "@/lib/tipos";
 
 export type UbicacionElegida = {
@@ -30,10 +34,15 @@ type PropsMapa = {
  */
 export default function SelectorUbicacion({
   centroSugerido,
+  municipio,
+  departamento,
   onCambio,
 }: {
   /** Cabecera del municipio elegido: da un punto de partida al mapa. */
   centroSugerido: { lat: number; lng: number } | null;
+  /** Sin esto, buscar "Carrera 21 # 33-58" devuelve Bogotá siempre. */
+  municipio?: string;
+  departamento?: string;
   onCambio: (u: UbicacionElegida) => void;
 }) {
   const abortar = useRef<AbortController | null>(null);
@@ -60,6 +69,16 @@ export default function SelectorUbicacion({
       onCambio(u);
     },
     [onCambio]
+  );
+
+  const contexto: Contexto = useMemo(
+    () => ({
+      municipio,
+      departamento,
+      lat: centroSugerido?.lat,
+      lng: centroSugerido?.lng,
+    }),
+    [municipio, departamento, centroSugerido]
   );
 
   async function abrirMapa() {
@@ -90,7 +109,9 @@ export default function SelectorUbicacion({
       abortar.current?.abort();
       abortar.current = new AbortController();
       setBuscando(true);
-      const { resultados, disponible } = await autocompletar(consulta, abortar.current.signal);
+      const { resultados, disponible } = await autocompletar(
+        consulta, contexto, abortar.current.signal
+      );
       setBuscando(false);
       setAutoDisponible(disponible);
       if (disponible) {
@@ -100,14 +121,16 @@ export default function SelectorUbicacion({
       }
     }, 550);
     return () => clearTimeout(t);
-  }, [consulta, autoDisponible]);
+  }, [consulta, autoDisponible, contexto]);
 
   async function buscarAhora() {
     if (consulta.trim().length < 3) return;
+    // Sin señal de cancelación: la búsqueda explícita la pidió la persona y no
+    // debe morir porque el autocompletado dispare justo después.
     abortar.current?.abort();
-    abortar.current = new AbortController();
+    abortar.current = null;
     setBuscando(true);
-    const r = await buscarDirecciones(consulta, abortar.current.signal);
+    const r = await buscarDirecciones(consulta, contexto);
     setBuscando(false);
     setSugerencias(r);
     setSinResultados(r.length === 0);
@@ -179,6 +202,15 @@ export default function SelectorUbicacion({
       <p className="text-center text-xs text-[var(--texto-suave)]">
         o busca la dirección
       </p>
+
+      {/* Sin municipio, la busqueda devuelve Bogota casi siempre. */}
+      {!municipio && (
+        <p className="flex items-start gap-2 rounded-xl bg-[var(--acento-fondo)] px-3 py-2.5 text-sm text-[var(--acento)]">
+          <AlertCircle size={15} className="mt-0.5 shrink-0" aria-hidden />
+          Elige primero el departamento y el municipio arriba: sin eso la
+          búsqueda devuelve resultados de otras ciudades.
+        </p>
+      )}
 
       {/* 2. Buscador de direcciones, tampoco necesita el mapa. */}
       <div className="relative">
@@ -256,6 +288,13 @@ export default function SelectorUbicacion({
                     {s.detalle && (
                       <span className="block truncate text-xs text-[var(--texto-suave)]">
                         {s.detalle}
+                      </span>
+                    )}
+                    {/* El numero de placa casi nunca esta en OSM: si solo se
+                        resolvio la via, hay que decirlo y no fingir precision. */}
+                    {s.soloVia && (
+                      <span className="mt-0.5 block text-xs text-[var(--acento)]">
+                        Solo la vía, sin el número — ajusta el pin después
                       </span>
                     )}
                   </span>

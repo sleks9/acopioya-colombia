@@ -173,6 +173,8 @@ export default function Reportar() {
           </p>
           <SelectorUbicacion
             centroSugerido={centroSugerido}
+            municipio={municipio || undefined}
+            departamento={departamento || undefined}
             onCambio={alCambiarUbicacion}
           />
         </div>

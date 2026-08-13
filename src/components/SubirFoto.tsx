@@ -94,11 +94,14 @@ export function SubirFoto({
         <label className="presionable flex min-h-11 w-fit cursor-pointer items-center gap-2 rounded-xl border border-[var(--borde-fuerte)] bg-[var(--superficie)] px-3.5 text-sm font-semibold">
           <Camera size={16} aria-hidden />
           {estado === "listo" ? "Cambiar foto" : "Tomar o elegir foto"}
+          {/* Sin `capture`: ese atributo abre la camara de una y BLOQUEA la
+              galeria. Se penso para el caso "estoy en el punto ahora", pero
+              impide subir una foto tomada antes. Sin el, el celular ofrece
+              camara o galeria, y la camara sigue a un toque. */}
           <input
             ref={entrada}
             type="file"
             accept="image/*"
-            capture="environment"
             onChange={(e) => manejar(e.target.files?.[0])}
             className="sr-only"
           />
