@@ -2,10 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
-  ArrowLeft, Check, Clock, Navigation, Phone, StickyNote, Users, X,
+  ArrowLeft, CalendarClock, Check, Clock, Navigation, Phone, StickyNote, Users, X,
 } from "lucide-react";
 import { obtenerCentro, obtenerHistorial } from "@/lib/datos";
-import { haceCuanto, nombreInsumo, urlFoto, INSUMOS_POR_ID } from "@/lib/tipos";
+import {
+  haceCuanto, jornadaVigente, nombreInsumo, textoJornada, urlFoto, INSUMOS_POR_ID,
+} from "@/lib/tipos";
 import {
   AvisoPrecision, InsigniaEstado, InsigniaFrescura, InsigniaPrecision, InsigniaVerificacion,
 } from "@/components/Insignias";
@@ -64,6 +66,7 @@ export default async function DetalleCentro(
   ]);
   if (!centro) notFound();
 
+  const jornada = jornadaVigente(centro);
   const mapas = `https://www.google.com/maps/dir/?api=1&destination=${centro.lat},${centro.lng}`;
   const waze = `https://waze.com/ul?ll=${centro.lat},${centro.lng}&navigate=yes`;
 
@@ -159,6 +162,26 @@ export default async function DetalleCentro(
           decoding="async"
           className="max-h-96 w-full rounded-2xl border border-[var(--borde)] object-cover"
         />
+      )}
+
+      {/* La jornada va antes que los botones de ruta: si el punto solo atiende
+          un dia concreto, saberlo cambia si tiene sentido salir ahora. */}
+      {jornada && (
+        <div
+          className="flex items-start gap-2.5 rounded-2xl border-2 px-4 py-3"
+          style={{
+            borderColor: "var(--primario)",
+            background: "var(--primario-fondo)",
+          }}
+        >
+          <CalendarClock size={18} className="mt-0.5 shrink-0 text-[var(--primario-fuerte)]" aria-hidden />
+          <div>
+            <p className="font-semibold text-[var(--primario-fuerte)]">
+              {jornada.enCurso ? "Jornada en curso" : "Jornada anunciada"}
+            </p>
+            <p className="text-sm">{textoJornada(jornada.inicio, jornada.fin)}</p>
+          </div>
+        </div>
       )}
 
       <div className="flex flex-wrap gap-2">

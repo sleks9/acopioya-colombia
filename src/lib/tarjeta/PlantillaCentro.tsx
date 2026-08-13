@@ -11,11 +11,13 @@
  */
 
 import type { Centro } from "@/lib/tipos";
-import { ETIQUETA_PRECISION, nombreInsumo } from "@/lib/tipos";
+import {
+  ETIQUETA_PRECISION, jornadaVigente, nombreInsumo, textoJornada,
+} from "@/lib/tipos";
 import type { Medidas } from "./formatos";
 import { COLOR_ESTADO } from "./marca";
 import { Marco } from "./Marco";
-import { Aviso, Bloque, Dato, FotoElastica, Resumen, Sub, Titular } from "./piezas";
+import { Aviso, Bloque, Dato, FotoElastica, Jornada, Resumen, Sub, Titular } from "./piezas";
 import { primeros, recortar } from "./texto";
 
 export function PlantillaCentro({
@@ -50,6 +52,7 @@ export function PlantillaCentro({
    * sacrifica cuando el título ya ocupa mucho.
    */
   const cabeOperador = !compacto && Boolean(c.operador) && nombre.length < 34;
+  const jornada = jornadaVigente(c);
 
   return (
     <Marco m={m} banda={COLOR_ESTADO[c.estado]} qr={qr}>
@@ -69,6 +72,16 @@ export function PlantillaCentro({
             ? "Ubicación aproximada"
             : "Ubicación aproximada: guíate por la dirección escrita"}
         </Aviso>
+      )}
+
+      {/* Justo debajo de la dirección: es el dato que hace que valga la pena
+          compartir la tarjeta, y el que caduca solo. */}
+      {jornada && (
+        <Jornada
+          m={m}
+          texto={textoJornada(jornada.inicio, jornada.fin)}
+          enCurso={jornada.enCurso}
+        />
       )}
 
       {/* En el apaisado el teléfono va ANTES de las listas.

@@ -8,6 +8,7 @@ import {
 import { actualizarCentro, type CentroPropio } from "@/app/acciones";
 import { SubirFoto } from "@/components/SubirFoto";
 import { SelectorHorario } from "@/components/SelectorHorario";
+import { SelectorJornada, type ValorJornada } from "@/components/SelectorJornada";
 import { guardarMiPunto } from "@/lib/misPuntos";
 import { haceCuanto, INSUMOS, type Estado } from "@/lib/tipos";
 import { BotonCompartir } from "@/components/BotonCompartir";
@@ -42,6 +43,11 @@ export function PanelEncargado({
   const [notas, setNotas] = useState(centro.notas ?? "");
   const [fotoUrl, setFotoUrl] = useState<string | null>(null);
   const [editarHorario, setEditarHorario] = useState(false);
+  const [jornada, setJornada] = useState<ValorJornada>(
+    centro.jornada_inicio && centro.jornada_fin
+      ? { inicio: centro.jornada_inicio, fin: centro.jornada_fin }
+      : null
+  );
   const [guardando, setGuardando] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [error, setError] = useState("");
@@ -82,6 +88,10 @@ export function PanelEncargado({
       horario: horario.trim() || null,
       notas: notas.trim() || null,
       foto_url: fotoUrl,
+      jornada_inicio: jornada?.inicio ?? null,
+      jornada_fin: jornada?.fin ?? null,
+      // Quitar la jornada tiene que poder distinguirse de "no la toques".
+      limpiar_jornada: jornada === null && Boolean(centro.jornada_inicio),
     });
 
     setGuardando(false);
@@ -184,6 +194,24 @@ export function PanelEncargado({
             </button>
           </div>
         )}
+      </section>
+
+      {/* El horario dice lo de todas las semanas; esto dice "este sábado". Son
+          cosas distintas y por eso van separadas. */}
+      <section>
+        <h2 className="mb-1 font-semibold">Jornada puntual</h2>
+        <p className="mb-2 text-sm text-[var(--texto-suave)]">
+          ¿Van a estar un día concreto fuera de su horario habitual? Anúncialo
+          aquí y quedará visible en la ficha y en la imagen para compartir.
+        </p>
+        <SelectorJornada
+          valorInicial={
+            centro.jornada_inicio && centro.jornada_fin
+              ? { inicio: centro.jornada_inicio, fin: centro.jornada_fin }
+              : null
+          }
+          onCambio={setJornada}
+        />
       </section>
 
       <div>

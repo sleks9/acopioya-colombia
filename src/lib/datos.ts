@@ -14,6 +14,7 @@ const COLUMNAS = [
   "estado", "necesita", "no_necesita", "notas",
   "verificacion", "foto_url", "confirmaciones", "reportes_negativos",
   "creado", "actualizado", "frescura",
+  "jornada_inicio", "jornada_fin",
 ].join(",");
 
 /**

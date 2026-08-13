@@ -4,13 +4,51 @@ import {
   RadioTower, ShieldAlert, Smartphone, Users,
 } from "lucide-react";
 import { obtenerCentros } from "@/lib/datos";
-import { abiertoAhora } from "@/lib/tipos";
+import { abiertoAhora, type Centro } from "@/lib/tipos";
 import { DifundirSitio } from "@/components/DifundirSitio";
+import { CarruselPuntos, type PuntoVitrina } from "@/components/CarruselPuntos";
 import { origen } from "@/lib/tarjeta/marca";
 
 export const revalidate = 60;
 
 const SITIO = origen();
+
+/**
+ * Los puntos que se asoman en el encabezado.
+ *
+ * Uno por ciudad, para que se vea la cobertura real y no cinco bodegas de
+ * Cali; y los que de verdad están abiertos a esta hora primero, porque
+ * enseñar en la portada un punto que cerró hace dos horas es exactamente lo
+ * que esta plataforma existe para no hacer.
+ *
+ * El orden se baraja en cada revalidación —una vez por minuto—, así que no
+ * son siempre las mismas ciudades las que salen. Al calcularse en el servidor
+ * y viajar como prop, el cliente no rehace el sorteo ni rompe la hidratación.
+ */
+function paraVitrina(recibiendo: Centro[], max = 8): PuntoVitrina[] {
+  const porCiudad = new Map<string, Centro>();
+  for (const c of recibiendo) {
+    const actual = porCiudad.get(c.ciudad);
+    if (!actual || (abiertoAhora(c.horario) === true && abiertoAhora(actual.horario) !== true)) {
+      porCiudad.set(c.ciudad, c);
+    }
+  }
+
+  return [...porCiudad.values()]
+    .sort((a, b) => {
+      const abierto = (c: Centro) => (abiertoAhora(c.horario) === true ? 0 : 1);
+      return abierto(a) - abierto(b) || Math.random() - 0.5;
+    })
+    .slice(0, max)
+    .map((c) => ({
+      id: c.id,
+      nombre: c.nombre,
+      ciudad: c.ciudad,
+      necesita: c.necesita,
+      horario: c.horario,
+      abierto: abiertoAhora(c.horario) === true,
+    }));
+}
 
 export default async function Inicio() {
   const centros = await obtenerCentros();
@@ -23,28 +61,44 @@ export default async function Inicio() {
   const recibiendo = centros.filter((c) => c.estado === "abierto");
   const abiertosAhora = recibiendo.filter((c) => abiertoAhora(c.horario) === true).length;
   const sinHorario = recibiendo.filter((c) => abiertoAhora(c.horario) === null).length;
+  const vitrina = paraVitrina(recibiendo);
 
   return (
     <>
       {/* ── Hero ───────────────────────────────────────────────── */}
       <section className="border-b border-[var(--borde)] bg-[var(--superficie)]">
         <div className="mx-auto max-w-6xl px-4 py-12 sm:py-16">
-          <p className="inline-flex items-center gap-1.5 rounded-full bg-[var(--peligro-fondo)] px-3 py-1 text-xs font-semibold text-[var(--peligro)]">
-            <RadioTower size={13} aria-hidden />
-            Terremoto M7.4 · 10 de agosto de 2026 · Chocó
-          </p>
+          {/* Dos columnas en pantalla ancha: el argumento a la izquierda y la
+              prueba de que hay datos vivos a la derecha. En móvil la vitrina
+              baja debajo del texto, nunca por encima del titular. */}
+          <div className="grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_20rem]">
+            <div>
+              <p className="inline-flex items-center gap-1.5 rounded-full bg-[var(--peligro-fondo)] px-3 py-1 text-xs font-semibold text-[var(--peligro)]">
+                <RadioTower size={13} aria-hidden />
+                Terremoto M7.4 · 10 de agosto de 2026 · Chocó
+              </p>
 
-          <h1 className="mt-4 max-w-3xl text-4xl font-bold leading-[1.1] tracking-tight text-balance sm:text-5xl">
-            Dónde llevar donaciones,{" "}
-            <span className="text-[var(--primario)]">actualizado hoy</span>.
-          </h1>
+              <h1 className="mt-4 text-4xl font-bold leading-[1.1] tracking-tight text-balance sm:text-5xl">
+                Dónde llevar donaciones,{" "}
+                <span className="text-[var(--primario)]">actualizado hoy</span>.
+              </h1>
 
-          <p className="mt-4 max-w-2xl text-lg text-[var(--texto-suave)] text-pretty">
-            Las listas de centros de acopio que publicó la prensa el primer día
-            siguen circulando una semana después. AcopioYa muestra si el punto
-            sigue abierto, qué está recibiendo y —sobre todo—{" "}
-            <strong className="text-[var(--texto)]">qué ya no debes llevar</strong>.
-          </p>
+              <p className="mt-4 max-w-2xl text-lg text-[var(--texto-suave)] text-pretty">
+                Las listas de centros de acopio que publicó la prensa el primer
+                día siguen circulando una semana después. AcopioYa muestra si el
+                punto sigue abierto, qué está recibiendo y —sobre todo—{" "}
+                <strong className="text-[var(--texto)]">qué ya no debes llevar</strong>.
+              </p>
+
+              {/* Compartir, a la vista y sin bajar: al final de la página casi
+                  nadie llega, y difundir es el cuello de botella del proyecto. */}
+              <div className="mt-6">
+                <DifundirSitio url={SITIO} compacto />
+              </div>
+            </div>
+
+            {vitrina.length > 0 && <CarruselPuntos puntos={vitrina} />}
+          </div>
 
           {/*
             Cuatro caminos, porque quien llega puede venir de cuatro

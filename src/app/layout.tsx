@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import Link from "next/link";
 import { HandHeart, MapPin, PawPrint, Plus, Users } from "lucide-react";
+import { Analytics } from "@vercel/analytics/next";
 import { Autoria } from "@/components/Autoria";
 import "./globals.css";
 
@@ -186,6 +187,18 @@ export default function RootLayout({
             </div>
           </div>
         </footer>
+
+        {/*
+          Medición de visitas de Vercel: sin cookies y sin identificar a nadie,
+          que es la única forma aceptable aquí —esta página la abre gente en
+          situación vulnerable y no tiene por qué dejar rastro—. Va al final del
+          body para no competir con nada por la red durante la carga.
+
+          Pesa ~1 KB. Sirve para saber si el trabajo de difusión funciona, que
+          es el cuello de botella real del proyecto: sin números no hay forma de
+          saber si llegar a un periodista sirvió de algo.
+        */}
+        <Analytics />
       </body>
     </html>
   );

@@ -19,8 +19,10 @@ Creado por **Santiago Ríos Morales (Sleks)** — Cali, Colombia.
 - **Estado por punto**: abierto / lleno / cerrado.
 - **"Qué NO llevar"** — el dato de mayor valor humanitario y el que nadie
   publica. Evita la avalancha de ropa usada que tapa bodegas y quema voluntarios.
-- **Frescura automática**: a las 8 h un punto se marca dudoso, a las 24 h sale
+- **Frescura automática**: a las 12 h un punto se marca dudoso, a las 72 h sale
   del mapa. Sin que nadie intervenga.
+- **Jornadas puntuales**: «el sábado 16 de 3 a 6 estamos en el parque», que el
+  horario semanal no sabe decir.
 - **Honestidad sobre la ubicación**: cada punto dice si su coordenada es exacta,
   marcada a mano o solo aproximada.
 - **Reportar toma <60 s** desde el celular, sin cuenta ni contraseña.
@@ -123,6 +125,28 @@ departamentos y 1.122 municipios** georreferenciados, en `src/lib/divipola.json`
 - Se usan los nombres de uso corriente donde el registro oficial se aparta de
   ellos: `Santiago de Cali` → **Cali**, `Cartagena de Indias` → **Cartagena**,
   `Bogotá, D.C.` → **Bogotá**.
+
+## Jornadas puntuales
+
+El `horario` describe la rutina de todas las semanas y no sabe decir «este
+sábado». Para eso están `jornada_inicio` y `jornada_fin`: un evento con fecha,
+opcional, que se anuncia desde el panel del encargado.
+
+**La jornada suspende la caducidad.** Sin eso la función no serviría de nada: un
+punto se marca viejo a las 72 h sin actualizar, así que una jornada anunciada el
+martes para el sábado desaparecería del mapa antes de llegar el día. Mientras
+`jornada_fin` esté por delante, el punto se considera fresco.
+
+Eso abre un agujero evidente —anunciar algo para 2030 y dejar un punto muerto
+fijo en el mapa—, así que el servidor rechaza jornadas a más de **30 días**, las
+que ya pasaron, y las que terminan antes de empezar. La validación vive en
+`validar_jornada()`, en Postgres, no en el formulario: la RPC está expuesta por
+PostgREST y cualquiera puede llamarla con la llave pública.
+
+Un detalle que costó encontrar: esa función estaba declarada `immutable` y el
+tope de 30 días no se aplicaba. Consulta `now()`, así que su resultado depende
+de cuándo se llame y Postgres podía evaluarla en tiempo de planificación. Va
+como `stable`.
 
 ## Auto-moderación
 

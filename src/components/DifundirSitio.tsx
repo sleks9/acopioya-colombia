@@ -24,7 +24,12 @@ También hay mascotas perdidas y familias pidiendo ayuda.
 
 `;
 
-export function DifundirSitio({ url }: { url: string }) {
+/**
+ * @param compacto una sola acción, para el encabezado. Ahí el objetivo es que
+ *   compartir esté a la vista sin bajar; desplegar cuatro botones competiría
+ *   con los cuatro caminos que son la razón de la página.
+ */
+export function DifundirSitio({ url, compacto = false }: { url: string; compacto?: boolean }) {
   const [copiado, setCopiado] = useState(false);
   const texto = MENSAJE + url;
 
@@ -40,6 +45,24 @@ export function DifundirSitio({ url }: { url: string }) {
     } catch {
       // Cancelar el diálogo del sistema no es un error que haya que anunciar.
     }
+  }
+
+  if (compacto) {
+    return (
+      <div className="flex flex-wrap items-center gap-2">
+        <button
+          type="button"
+          onClick={compartir}
+          className="presionable inline-flex min-h-11 items-center gap-2 rounded-xl border-2 border-[var(--primario)] px-4 text-sm font-semibold text-[var(--primario-fuerte)]"
+        >
+          {copiado ? <Check size={16} aria-hidden /> : <Share2 size={16} aria-hidden />}
+          {copiado ? "Mensaje copiado" : "Compartir AcopioYa"}
+        </button>
+        <span className="text-xs text-[var(--texto-suave)]">
+          Pásalo a quien vaya a donar
+        </span>
+      </div>
+    );
   }
 
   return (

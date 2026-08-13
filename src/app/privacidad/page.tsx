@@ -38,6 +38,21 @@ export default function Privacidad() {
         </p>
       </Seccion>
 
+      <Seccion titulo="Medición de visitas">
+        <p>
+          Contamos cuántas personas abren cada página con la medición de Vercel:{" "}
+          <strong>sin cookies y sin perfilar a nadie</strong>. No se guarda quién
+          eres, ni de dónde vienes, ni qué punto miraste; solo cuántas visitas
+          tuvo cada página.
+        </p>
+        <p>
+          Sirve para una sola cosa: saber si la información está llegando a la
+          gente. Sin ese dato no hay forma de distinguir un mapa que ayuda de uno
+          que nadie abre. Si usas un bloqueador, la medición simplemente no se
+          carga y el sitio funciona igual.
+        </p>
+      </Seccion>
+
       <Seccion titulo="Dinero">
         <p>
           AcopioYa <strong>nunca pide ni recibe dinero</strong>, no publica

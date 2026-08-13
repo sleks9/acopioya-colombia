@@ -35,7 +35,48 @@ export type Centro = {
   creado: string;
   actualizado: string;
   frescura: Frescura;
+  /**
+   * Jornada puntual: "el sábado 16 de 3 a 6 estamos en el parque".
+   *
+   * El `horario` describe la rutina semanal y no sabe decir "este sábado".
+   * Mientras haya una jornada por delante el punto no caduca, porque si no
+   * desaparecería del mapa antes de llegar el día que anuncia.
+   */
+  jornada_inicio: string | null;
+  jornada_fin: string | null;
 };
+
+/** ¿Tiene una jornada anunciada que todavía no ha terminado? */
+export function jornadaVigente(c: Pick<Centro, "jornada_inicio" | "jornada_fin">) {
+  if (!c.jornada_inicio || !c.jornada_fin) return null;
+  const fin = new Date(c.jornada_fin);
+  if (fin.getTime() < Date.now()) return null;
+  return { inicio: new Date(c.jornada_inicio), fin, enCurso: new Date(c.jornada_inicio) <= new Date() };
+}
+
+/**
+ * "Sábado 16 de agosto, 3:00 p.m. a 6:00 p.m." en hora de Colombia.
+ *
+ * Se fuerza la zona porque una jornada de Quibdó empieza a las 3 de Colombia
+ * aunque la consulten desde Madrid.
+ */
+export function textoJornada(inicio: Date, fin: Date): string {
+  const dia = new Intl.DateTimeFormat("es-CO", {
+    timeZone: "America/Bogota",
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  }).format(inicio);
+  const hora = (d: Date) =>
+    new Intl.DateTimeFormat("es-CO", {
+      timeZone: "America/Bogota",
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    }).format(d);
+  const capitalizado = dia.charAt(0).toUpperCase() + dia.slice(1);
+  return `${capitalizado}, ${hora(inicio)} a ${hora(fin)}`;
+}
 
 /**
  * Catalogo cerrado, espejo de la tabla `insumos`. Lista fija a proposito: con

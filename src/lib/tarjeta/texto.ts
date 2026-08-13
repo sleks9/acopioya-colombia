@@ -7,7 +7,7 @@
  */
 
 import type { Centro } from "@/lib/tipos";
-import { nombreInsumo } from "@/lib/tipos";
+import { jornadaVigente, nombreInsumo, textoJornada } from "@/lib/tipos";
 import type { Mascota } from "@/lib/mascotas";
 import { haceDias, nombreEspecie, tituloMascota } from "@/lib/mascotas";
 import type { Solicitud } from "@/lib/solicitudes";
@@ -52,7 +52,8 @@ export type TextosCompartir = { whatsapp: string; x: string; plano: string; titu
 export type DatosCentro = Pick<
   Centro,
   "id" | "nombre" | "estado" | "direccion" | "ciudad" | "departamento" | "necesita" | "no_necesita" | "horario"
->;
+> &
+  Partial<Pick<Centro, "jornada_inicio" | "jornada_fin">>;
 
 export type DatosMascota = Pick<
   Mascota,
@@ -81,6 +82,15 @@ export function textosCentro(c: DatosCentro): TextosCompartir {
     `*${c.nombre}* · Centro de acopio ${estado}`,
     `${c.direccion} · ${c.ciudad}, ${c.departamento}`,
   ];
+  // La jornada arriba del todo: es lo que hace que el mensaje valga la pena.
+  const jornada = jornadaVigente({
+    jornada_inicio: c.jornada_inicio ?? null,
+    jornada_fin: c.jornada_fin ?? null,
+  });
+  if (jornada) {
+    lineas.push(`*${jornada.enCurso ? "Jornada en curso" : "Jornada especial"}:* ${textoJornada(jornada.inicio, jornada.fin)}`);
+  }
+
   if (si.visibles.length) lineas.push("", `*Están recibiendo:* ${listaLegible(si.visibles, si.resto)}`);
   if (no.visibles.length) lineas.push(`*NO llevar:* ${listaLegible(no.visibles, no.resto)}`);
   if (c.horario) lineas.push("", `Horario: ${c.horario}`);

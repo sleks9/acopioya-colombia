@@ -102,6 +102,8 @@ export type CentroPropio = {
   foto_url: string | null;
   verificacion: string;
   actualizado: string;
+  jornada_inicio: string | null;
+  jornada_fin: string | null;
 };
 
 /** Carga la ficha propia a partir del enlace mágico. */
@@ -128,6 +130,10 @@ export async function actualizarCentro(
     horario?: string | null;
     notas?: string | null;
     foto_url?: string | null;
+    jornada_inicio?: string | null;
+    jornada_fin?: string | null;
+    /** `coalesce` no distingue "no toques esto" de "borralo": de ahi la bandera. */
+    limpiar_jornada?: boolean;
   }
 ): Promise<{ ok: boolean; error?: string }> {
   const { error } = await supabase.rpc("actualizar_centro", {
@@ -138,6 +144,9 @@ export async function actualizarCentro(
     p_horario: campos.horario ?? null,
     p_notas: campos.notas ?? null,
     p_foto_url: campos.foto_url ?? null,
+    p_jornada_inicio: campos.jornada_inicio ?? null,
+    p_jornada_fin: campos.jornada_fin ?? null,
+    p_limpiar_jornada: campos.limpiar_jornada ?? false,
   });
   if (error) return { ok: false, error: error.message };
 

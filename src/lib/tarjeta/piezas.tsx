@@ -240,6 +240,52 @@ export function Resumen({
   );
 }
 
+/**
+ * La jornada puntual, en verde y con el peso de un titular pequeño.
+ *
+ * Es el motivo por el que alguien comparte la tarjeta —«este sábado estamos
+ * ahí»—, así que va destacada y no como una línea más de datos.
+ */
+export function Jornada({ m, texto, enCurso }: { m: Medidas; texto: string; enCurso: boolean }) {
+  const tam = Math.round(m.cuerpo * 1.05);
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        flexShrink: 0,
+        backgroundColor: C.primarioFondo,
+        borderRadius: Math.round(m.radio * 0.7),
+        padding: Math.round(m.cuerpo * 0.5),
+        marginTop: m.hueco,
+      }}
+    >
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={icono("calendario", C.primarioFuerte, 2.6)} width={tam} height={tam} alt="" style={{ flexShrink: 0 }} />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          marginLeft: Math.round(m.cuerpo * 0.4),
+          overflow: "hidden",
+        }}
+      >
+        <span
+          style={{
+            fontSize: Math.round(m.cuerpo * 0.8),
+            fontWeight: 700,
+            letterSpacing: m.cuerpo * 0.04,
+            color: C.primarioFuerte,
+          }}
+        >
+          {enCurso ? "JORNADA EN CURSO" : "JORNADA ESPECIAL"}
+        </span>
+        <span style={{ fontSize: m.cuerpo, fontWeight: 700, color: C.texto }}>{texto}</span>
+      </div>
+    </div>
+  );
+}
+
 /** Aviso en ámbar: la insignia de ubicación aproximada, la frescura dudosa. */
 export function Aviso({ m, children }: { m: Medidas; children: string }) {
   const tam = Math.round(m.cuerpo * 1.05);
