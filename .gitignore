@@ -45,3 +45,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Piezas graficas de difusion (pesadas y se editan aparte)
+/assets/publicidad
