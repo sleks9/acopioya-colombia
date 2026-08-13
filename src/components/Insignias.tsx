@@ -1,5 +1,8 @@
-import { AlertTriangle, BadgeCheck, Check, CircleAlert, Clock, MapPinOff, X } from "lucide-react";
 import {
+  AlertTriangle, BadgeCheck, Check, CircleAlert, Clock, MapPinOff, Moon, X,
+} from "lucide-react";
+import {
+  abiertoAhora,
   ETIQUETA_ESTADO,
   ETIQUETA_FRESCURA,
   ETIQUETA_PRECISION,
@@ -58,6 +61,28 @@ export function InsigniaFrescura({ frescura }: { frescura: Frescura }) {
     <span className={`${base} bg-[var(--acento-fondo)] text-[var(--acento)]`}>
       <Clock size={12} strokeWidth={3} aria-hidden />
       {ETIQUETA_FRESCURA[frescura]}
+    </span>
+  );
+}
+
+/**
+ * Abierto o cerrado según el reloj, no según el estado declarado.
+ * Si el horario no se puede interpretar no se afirma nada: callar es mejor que
+ * mandar a alguien a una puerta cerrada.
+ */
+export function InsigniaHorarioAhora({ horario }: { horario: string | null }) {
+  const abierto = abiertoAhora(horario);
+  if (abierto === null) return null;
+
+  return abierto ? (
+    <span className={`${base} bg-[var(--primario-fondo)] text-[var(--primario-fuerte)]`}>
+      <Clock size={12} strokeWidth={3} aria-hidden />
+      Abierto ahora
+    </span>
+  ) : (
+    <span className={`${base} bg-[var(--superficie-2)] text-[var(--texto-suave)]`}>
+      <Moon size={12} strokeWidth={3} aria-hidden />
+      Cerrado a esta hora
     </span>
   );
 }

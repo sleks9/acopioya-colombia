@@ -4,6 +4,7 @@ import { haceCuanto, nombreInsumo, type Centro } from "@/lib/tipos";
 import {
   InsigniaEstado,
   InsigniaFrescura,
+  InsigniaHorarioAhora,
   InsigniaPrecision,
   InsigniaVerificacion,
 } from "./Insignias";
@@ -38,6 +39,11 @@ export function TarjetaCentro({
 
         <div className="mb-2 mt-3 flex flex-wrap items-center gap-1.5">
           <InsigniaEstado estado={centro.estado} />
+          {/* Solo se anuncia el horario si el punto además está recibiendo:
+              decir "abierto ahora" sobre uno lleno seria contradictorio. */}
+          {centro.estado === "abierto" && (
+            <InsigniaHorarioAhora horario={centro.horario} />
+          )}
           <InsigniaVerificacion verificacion={centro.verificacion} />
           <InsigniaFrescura frescura={centro.frescura} />
           <InsigniaPrecision precision={centro.precision} />

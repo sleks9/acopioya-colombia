@@ -4,13 +4,21 @@ import {
   RadioTower, ShieldAlert, Smartphone,
 } from "lucide-react";
 import { obtenerCentros } from "@/lib/datos";
+import { abiertoAhora } from "@/lib/tipos";
 
 export const revalidate = 60;
 
 export default async function Inicio() {
   const centros = await obtenerCentros();
-  const abiertos = centros.filter((c) => c.estado === "abierto").length;
   const ciudades = new Set(centros.map((c) => c.ciudad)).size;
+
+  // "Abiertos ahora" tiene que significar eso de verdad. Antes contaba el estado
+  // declarado (abierto / lleno / cerrado), que no dice nada de la hora: a las
+  // 11 de la noche mostraba "35 abiertos ahora". Ahora se cruza con el horario
+  // publicado, en hora de Colombia, y solo cuenta lo que se puede afirmar.
+  const recibiendo = centros.filter((c) => c.estado === "abierto");
+  const abiertosAhora = recibiendo.filter((c) => abiertoAhora(c.horario) === true).length;
+  const sinHorario = recibiendo.filter((c) => abiertoAhora(c.horario) === null).length;
 
   return (
     <>
@@ -52,11 +60,19 @@ export default async function Inicio() {
           </div>
 
           {centros.length > 0 && (
-            <dl className="mt-9 grid max-w-lg grid-cols-3 gap-4">
-              <Cifra valor={centros.length} etiqueta="puntos activos" />
-              <Cifra valor={abiertos} etiqueta="abiertos ahora" />
-              <Cifra valor={ciudades} etiqueta="ciudades" />
-            </dl>
+            <>
+              <dl className="mt-9 grid max-w-lg grid-cols-3 gap-4">
+                <Cifra valor={centros.length} etiqueta="puntos activos" />
+                <Cifra valor={abiertosAhora} etiqueta="abiertos a esta hora" />
+                <Cifra valor={ciudades} etiqueta="ciudades" />
+              </dl>
+              {sinHorario > 0 && (
+                <p className="tabular mt-2 text-xs text-[var(--texto-suave)]">
+                  {sinHorario} {sinHorario === 1 ? "punto no tiene" : "puntos no tienen"} horario
+                  publicado: confirma antes de ir.
+                </p>
+              )}
+            </>
           )}
         </div>
       </section>

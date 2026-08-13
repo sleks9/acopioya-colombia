@@ -121,6 +121,84 @@ export function urlFoto(url: string | null): string | null {
   return m ? `/api/foto/${m[1]}` : url;
 }
 
+/**
+ * ¿Está abierto AHORA, según su horario publicado?
+ *
+ * Devuelve null cuando no se puede saber: sin horario, o escrito en un formato
+ * que no se reconoce. Es deliberado —"no sé" y "está cerrado" son cosas
+ * distintas, y afirmar cualquiera de las dos sin fundamento es justo lo que
+ * esta plataforma existe para evitar.
+ *
+ * Se calcula en hora de Colombia, no en la del servidor ni la del visitante:
+ * un punto de Quibdó abre a las 8 de Colombia aunque lo consulten desde Madrid.
+ */
+export function abiertoAhora(horario: string | null): boolean | null {
+  if (!horario) return null;
+  const h = horario.toLowerCase();
+
+  const ahora = new Date();
+  // en-CA da AAAA-MM-DD y hora de 24 h, fáciles de partir.
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Bogota",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const partes = Object.fromEntries(
+    fmt.formatToParts(ahora).map((p) => [p.type, p.value])
+  );
+  const diaCorto = String(partes.weekday ?? "").toLowerCase().slice(0, 3);
+  const minutosAhora = Number(partes.hour) * 60 + Number(partes.minute);
+
+  const DIAS: Record<string, number> = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
+  const hoy = DIAS[diaCorto];
+  if (hoy === undefined) return null;
+
+  // ── Qué días atiende ──
+  // "Abierto 24 horas" a secas no nombra dias: se entiende como todos, y se
+  // resuelve antes de exigirlos. Varios puntos sembrados vienen escritos asi.
+  const veinticuatro = h.includes("24 horas");
+
+  let dias: number[] | null = null;
+  if (h.includes("todos los días") || h.includes("todos los dias")) dias = [0, 1, 2, 3, 4, 5, 6];
+  else if (h.includes("lunes a domingo")) dias = [0, 1, 2, 3, 4, 5, 6];
+  else if (h.includes("lunes a sábado") || h.includes("lunes a sabado")) dias = [1, 2, 3, 4, 5, 6];
+  else if (h.includes("lunes a viernes")) dias = [1, 2, 3, 4, 5];
+  else {
+    const sueltos: [string, number][] = [
+      ["domingo", 0], ["lunes", 1], ["martes", 2], ["miércoles", 3],
+      ["miercoles", 3], ["jueves", 4], ["viernes", 5], ["sábado", 6], ["sabado", 6],
+    ];
+    const hallados = sueltos.filter(([n]) => h.includes(n)).map(([, d]) => d);
+    if (hallados.length) dias = [...new Set(hallados)];
+  }
+  if (!dias) return veinticuatro ? true : null;
+  if (!dias.includes(hoy)) return false;
+
+  // ── En qué franja ──
+  if (veinticuatro) return true;
+
+  // "8:00 a.m. a 6:00 p.m." y variantes con o sin minutos.
+  const rango = h.match(
+    /(\d{1,2})(?::(\d{2}))?\s*(a\.?\s?m\.?|p\.?\s?m\.?)\s*(?:a|-|hasta)\s*(\d{1,2})(?::(\d{2}))?\s*(a\.?\s?m\.?|p\.?\s?m\.?)/
+  );
+  if (!rango) return null;
+
+  const aMinutos = (hh: string, mm: string | undefined, sufijo: string) => {
+    let n = parseInt(hh, 10) % 12;
+    if (sufijo.replace(/[.\s]/g, "").startsWith("pm")) n += 12;
+    return n * 60 + (mm ? parseInt(mm, 10) : 0);
+  };
+
+  const desde = aMinutos(rango[1], rango[2], rango[3]);
+  const hasta = aMinutos(rango[4], rango[5], rango[6]);
+
+  // Franja que cruza la medianoche (por ejemplo 8 p.m. a 2 a.m.).
+  if (hasta <= desde) return minutosAhora >= desde || minutosAhora < hasta;
+  return minutosAhora >= desde && minutosAhora < hasta;
+}
+
 /** Texto relativo en español, sin dependencias externas. */
 export function haceCuanto(iso: string): string {
   const ms = Date.now() - new Date(iso).getTime();
